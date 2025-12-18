@@ -19,7 +19,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) router.push("/dashboard");
+    if (token) router.push("/explore");
   }, [router]);
 
   const handleRegister = async (e: React.FormEvent) => {

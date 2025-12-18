@@ -17,7 +17,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) router.push("/dashboard");
+    if (token) router.push("/explore");
   }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
