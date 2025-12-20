@@ -4,12 +4,13 @@ import Post from "@/models/Post";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
+    const { id } = await params;
     
-    const post = await Post.findById(params.id)
+    const post = await Post.findById(id)
       .populate('author', 'username')
       .populate({
         path: 'comments',

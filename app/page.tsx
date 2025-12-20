@@ -63,39 +63,15 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-slate-100 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col text-slate-100 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
       </div>
 
-      {/* Header */}
-      <motion.header 
-        className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-slate-950/80 backdrop-blur-lg border-b border-slate-800' : 'bg-transparent'}`}
-        style={{ opacity: isScrolled ? headerOpacity : 1 }}
-      >
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-6 h-6 text-indigo-400" />
-            <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-              ProBlog
-            </h1>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" className="hover:bg-slate-800" onClick={() => router.push("/login")}>
-              Login
-            </Button>
-            <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/20" onClick={() => router.push("/register")}>
-              Get Started
-            </Button>
-          </div>
-        </div>
-      </motion.header>
-
       {/* Hero Section */}
-      <main className="relative z-10 max-w-7xl mx-auto px-6 pt-32 pb-20">
+      <main className="relative z-10 max-w-7xl mx-auto px-6 pt-20 pb-20">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-32">
           <motion.div
             initial={{ opacity: 0, y: 24 }}

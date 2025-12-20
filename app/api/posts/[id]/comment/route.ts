@@ -6,10 +6,11 @@ import jwt from "jsonwebtoken";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
+    const { id } = await params;
     
     const token = req.headers.get("authorization")?.split(" ")[1];
     if (!token) {
@@ -25,7 +26,7 @@ export async function POST(
       return NextResponse.json({ message: "Comment cannot be empty" }, { status: 400 });
     }
 
-    const post = await Post.findById(params.id);
+    const post = await Post.findById(id);
     if (!post) {
       return NextResponse.json({ message: "Post not found" }, { status: 404 });
     }
@@ -33,7 +34,7 @@ export async function POST(
     const comment = await Comment.create({
       content,
       author: userId,
-      post: params.id
+      post: id
     });
 
     post.comments.push(comment._id);

@@ -61,20 +61,11 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
       </div>
-
-      <header className="relative z-10 border-b border-slate-800 bg-slate-950/70 backdrop-blur">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-2 cursor-pointer" onClick={() => router.push("/")}>
-          <Sparkles className="w-6 h-6 text-indigo-400" />
-          <span className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-            ProBlog
-          </span>
-        </div>
-      </header>
 
       <main className="relative z-10 flex items-center justify-center px-4 py-20">
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
