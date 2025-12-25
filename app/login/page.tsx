@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/button";
 import { Navbar } from "@/components/navbar";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -45,8 +45,7 @@ export default function LoginPage() {
       // Store token
       localStorage.setItem("token", data.token);
       
-      // Redirect to dashboard or home
-      router.push("/dashboard");
+      router.push("/explore");
     } catch (err) {
       setError("Something went wrong. Please try again.");
       setLoading(false);
@@ -69,7 +68,7 @@ export default function LoginPage() {
       ></div>
       
       <div className="relative z-10">
-        <Navbar />
+        <Navbar variant="auth"/>
         
         <main className="flex items-center justify-center min-h-screen px-6 pt-20">
           <div className="w-full max-w-md">

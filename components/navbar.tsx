@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/button"
 
-export function Navbar() {
+export function Navbar({ variant = "default" }: { variant?: "default" | "auth" }) {
   const [scrolled, setScrolled] = useState(false);
-
+  
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
@@ -26,24 +26,25 @@ export function Navbar() {
           Blogify
         </span>
       </Link>
-      
-      <div className="flex gap-3 items-center">
-        <Link href="/explore">
-          <Button variant="ghost" className="text-white hover:text-purple-400 cursor-pointer">
-            Explore
-          </Button>
-        </Link>
-        <Link href="/login">
-          <Button variant="outline" className="cursor-pointer">
-            Login
-          </Button>
-        </Link>
-        <Link href="/register">
-          <Button className="shadow-lg shadow-purple-500/30 cursor-pointer">
-            Register
-          </Button>
-        </Link>
-      </div>
+      {variant === "default" && (
+        <div className="flex gap-3 items-center">
+          <Link href="/explore">
+            <Button variant="ghost" className="text-white hover:text-purple-400 cursor-pointer">
+              Explore
+            </Button>
+          </Link>
+          <Link href="/login">
+            <Button variant="outline" className="cursor-pointer">
+              Login
+            </Button>
+          </Link>
+          <Link href="/register">
+            <Button className="shadow-lg shadow-purple-500/30 cursor-pointer">
+              Register
+            </Button>
+          </Link>
+        </div>
+      )}
     </nav>
   )
 }

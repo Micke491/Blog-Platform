@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/navbar"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/button"
 import Link from "next/link"
 
 export default function HomePage() {
@@ -41,7 +41,7 @@ export default function HomePage() {
       ></div>
       
       <div className="relative z-10">
-        <Navbar />
+        <Navbar variant="default" />
         
         <main className="max-w-7xl mx-auto px-6 pt-24 pb-32">
           {/* Hero Section */}
