@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import PostList from "@/components/PostList";
 import SearchBar from "@/components/SearchBar";
@@ -18,30 +19,31 @@ type Post = {
 };
 
 export default function ExplorePage() {
+  const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<"latest" | "likes">("latest");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  const isLoggedIn =
-    typeof window !== "undefined" &&
-    (localStorage.getItem("token") ||
-      document.cookie.includes("token="));
-
-  function logout() {
-    localStorage.removeItem("token");
-    document.cookie =
-      "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-    window.location.href = "/";
-  }
+  // Auth guard
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+    setIsAuthenticated(true);
+  }, [router]);
 
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     async function load() {
       setLoading(true);
 
-      // Replace with real API later
       const mockPosts: Post[] = [
         {
           _id: "1",
@@ -88,7 +90,7 @@ export default function ExplorePage() {
     }
 
     load();
-  }, []);
+  }, [isAuthenticated]);
 
   const allTags = Array.from(
     new Set(posts.flatMap((p) => p.tags || []))
@@ -124,15 +126,24 @@ export default function ExplorePage() {
     );
   }
 
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-400">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden">
-      {/* Background */}
       <div className="fixed inset-0 bg-gradient-to-br from-purple-900 via-black to-pink-900 opacity-40" />
 
       <div className="relative z-10">
         <Navbar />
 
-        {/* Header */}
         <section className="max-w-7xl mx-auto px-6 pt-28 pb-12">
           <h1 className="text-6xl font-black mb-4">Explore</h1>
           <p className="text-gray-400 text-lg">
@@ -140,37 +151,20 @@ export default function ExplorePage() {
           </p>
         </section>
 
-        {/* Controls */}
         <section className="sticky top-20 z-20 backdrop-blur-md bg-black/40 border-y border-white/10">
           <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-4">
-              {/* Sort */}
-              <select
-                value={sort}
-                onChange={(e) =>
-                  setSort(e.target.value as "latest" | "likes")
-                }
-                className="w-40 rounded-full bg-white/5 border border-white/20 px-4 py-2 text-sm text-white focus:outline-none focus:border-pink-400"
-              >
-                <option value="latest">Latest</option>
-                <option value="likes">Most liked</option>
-              </select>
-            </div>
+            <select
+              value={sort}
+              onChange={(e) =>
+                setSort(e.target.value as "latest" | "likes")
+              }
+              className="w-40 rounded-full bg-white/5 border border-white/20 px-4 py-2 text-sm text-white focus:outline-none focus:border-pink-400"
+            >
+              <option value="latest">Latest</option>
+              <option value="likes">Most liked</option>
+            </select>
 
-            <div className="flex items-center gap-4">
-              {/* Search */}
-              <SearchBar value={search} onChange={setSearch} />
-
-              {/* Logout */}
-              {isLoggedIn && (
-                <button
-                  onClick={logout}
-                  className="px-5 py-2 rounded-full text-sm font-medium bg-white/5 border border-white/20 text-gray-300 hover:text-white hover:bg-red-500/20 hover:border-red-400 transition-all"
-                >
-                  Logout
-                </button>
-              )}
-            </div>
+            <SearchBar value={search} onChange={setSearch} />
           </div>
 
           {allTags.length > 0 && (
@@ -184,12 +178,10 @@ export default function ExplorePage() {
           )}
         </section>
 
-        {/* Posts */}
         <main className="max-w-7xl mx-auto px-6 py-16">
           <PostList posts={filteredPosts} loading={loading} />
         </main>
 
-        {/* Footer */}
         <footer className="border-t border-white/10 py-10 text-center text-gray-400">
           © {new Date().getFullYear()} Blogify — Discover great writing
         </footer>
