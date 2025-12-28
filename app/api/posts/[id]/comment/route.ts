@@ -4,6 +4,29 @@ import Post from "@/models/Post";
 import Comment from "@/models/Comment";
 import jwt from "jsonwebtoken";
 
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    await connectDB();
+    const { id } = await params;
+
+    const post = await Post.findById(id);
+    if (!post) {
+      return NextResponse.json({ message: "Post not found" }, { status: 404 });
+    }
+
+    const comments = await Comment.find({ post: id })
+      .populate('author', 'username')
+      .sort({ createdAt: -1 });
+
+    return NextResponse.json({ comments }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ message: "Error fetching comments" }, { status: 500 });
+  }
+}
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }

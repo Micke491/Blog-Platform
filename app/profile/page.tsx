@@ -28,7 +28,6 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [savingBio, setSavingBio] = useState(false);
 
-  // ---------- Auth Guard ----------
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {

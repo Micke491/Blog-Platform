@@ -1,0 +1,118 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Navbar } from "@/components/navbar";
+import PostModal from "@/components/PostModal";
+
+type Post = {
+  _id: string;
+  title: string;
+  content: string;
+  coverImage?: string;
+  author: { username: string };
+  createdAt: Date;
+  likes: any[];
+  tags?: string[];
+};
+
+export default function PostPage() {
+  const params = useParams();
+  const router = useRouter();
+  const [post, setPost] = useState<Post | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUsername, setCurrentUsername] = useState<string>("");
+
+  // Auth guard
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+    setIsAuthenticated(true);
+
+    // Get current username from API
+    async function fetchUser() {
+      try {
+        const response = await fetch("/api/me", {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (data.username) {
+          setCurrentUsername(data.username);
+        }
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    }
+
+    fetchUser();
+  }, [router]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !params.id) return;
+
+    async function loadPost() {
+      setLoading(true);
+
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(`/api/posts/${params.id}`, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setPost(data.post);
+        } else {
+          router.replace("/explore");
+        }
+      } catch (error) {
+        console.error("Error fetching post:", error);
+        router.replace("/explore");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadPost();
+  }, [isAuthenticated, params.id, router]);
+
+  if (!isAuthenticated || loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[80vh]">
+          <div className="text-white">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!post) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[80vh]">
+          <div className="text-white">Post not found</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+      <Navbar />
+      <PostModal
+        post={post}
+        onClose={() => router.back()}
+        currentUsername={currentUsername}
+      />
+    </div>
+  );
+}
