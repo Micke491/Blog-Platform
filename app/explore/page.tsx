@@ -85,6 +85,11 @@ export default function ExplorePage() {
     }
 
     load();
+
+    // Refetch posts when window regains focus (e.g., returning from post modal)
+    const handleFocus = () => load();
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, [isAuthenticated]);
 
   const allTags = Array.from(

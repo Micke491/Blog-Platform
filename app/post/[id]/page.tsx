@@ -23,6 +23,7 @@ export default function PostPage() {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUsername, setCurrentUsername] = useState<string>("");
+  const [currentUserId, setCurrentUserId] = useState<string>("");
 
   // Auth guard
   useEffect(() => {
@@ -44,6 +45,7 @@ export default function PostPage() {
         const data = await response.json();
         if (data.username) {
           setCurrentUsername(data.username);
+          setCurrentUserId(data.id);
         }
       } catch (error) {
         console.error("Error fetching user:", error);
@@ -112,6 +114,7 @@ export default function PostPage() {
         post={post}
         onClose={() => router.back()}
         currentUsername={currentUsername}
+        currentUserId={currentUserId}
       />
     </div>
   );

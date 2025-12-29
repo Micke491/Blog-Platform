@@ -11,8 +11,10 @@ export default function EditorPage() {
   const [content, setContent] = useState("");
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   async function uploadImage(file: File) {
+    setUploading(true);
     const form = new FormData();
     form.append("file", file);
 
@@ -24,11 +26,13 @@ export default function EditorPage() {
     if (!res.ok) {
       const error = await res.json();
       alert(error.error || "Upload failed");
+      setUploading(false);
       return;
     }
 
     const data = await res.json();
     setImage(data.url);
+    setUploading(false);
   }
 
   async function publish() {
@@ -97,7 +101,9 @@ export default function EditorPage() {
           type="file"
           accept="image/*"
           onChange={(e) => e.target.files && uploadImage(e.target.files[0])}
+          disabled={uploading}
         />
+        {uploading && <p className="text-gray-400">Uploading image...</p>}
 
         {image && (
           <img src={image} className="rounded-xl max-h-80 object-cover" />
@@ -105,10 +111,10 @@ export default function EditorPage() {
 
         <button
           onClick={publish}
-          disabled={loading}
+          disabled={loading || uploading}
           className="w-full py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 font-semibold hover:scale-[1.02] transition"
         >
-          {loading ? "Posting..." : "Post"}
+          {loading ? "Posting..." : uploading ? "Uploading..." : "Post"}
         </button>
       </main>
     </div>

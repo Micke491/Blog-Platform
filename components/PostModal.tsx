@@ -25,9 +25,10 @@ interface PostModalProps {
   post: Post | null;
   onClose: () => void;
   currentUsername?: string;
+  currentUserId?: string;
 }
 
-export default function PostModal({ post, onClose, currentUsername }: PostModalProps) {
+export default function PostModal({ post, onClose, currentUsername, currentUserId }: PostModalProps) {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -39,7 +40,7 @@ export default function PostModal({ post, onClose, currentUsername }: PostModalP
 
     // Initialize like state
     setLikeCount(post.likes.length);
-    setLiked(false); // You can check if current user has liked
+    setLiked(currentUserId ? post.likes.includes(currentUserId) : false);
 
     // Fetch comments from API
     async function fetchComments() {

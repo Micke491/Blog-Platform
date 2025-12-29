@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/navbar";
+import PostList from "@/components/PostList";
 
 type User = {
   username: string;
@@ -14,8 +15,12 @@ type User = {
 type Post = {
   _id: string;
   title: string;
+  content: string;
   coverImage?: string;
-  createdAt: string;
+  author: { username: string };
+  createdAt: Date;
+  likes: any[];
+  tags?: string[];
 };
 
 export default function ProfilePage() {
@@ -24,16 +29,6 @@ export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.replace("/login");
-      return;
-    }
-
-    loadProfile();
-  }, [router]);
 
   async function loadProfile() {
     try {
@@ -48,13 +43,13 @@ export default function ProfilePage() {
       const meData = await meRes.json();
       setUser(meData);
 
-      const postsRes = await fetch("/api/posts/me", {
+      const postsRes = await fetch(`/api/posts?author=${meData.username}&includePrivate=true`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       if (postsRes.ok) {
         const postsData = await postsRes.json();
-        setPosts(postsData);
+        setPosts(postsData.posts || []);
       }
     } catch {
       router.replace("/login");
@@ -62,6 +57,21 @@ export default function ProfilePage() {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+
+    loadProfile();
+
+    // Refetch posts when window regains focus
+    const handleFocus = () => loadProfile();
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [router]);
 
   function logout() {
     localStorage.removeItem("token");
@@ -127,33 +137,11 @@ export default function ProfilePage() {
           <p className="text-gray-400">You have not published any posts yet.</p>
         )}
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {posts.map((post) => (
-            <div
-              key={post._id}
-              onClick={() => router.push(`/post/${post._id}`)}
-              className="relative aspect-square bg-white/5 border border-white/10 rounded-xl overflow-hidden cursor-pointer group"
-            >
-              {post.coverImage ? (
-                <img
-                  src={post.coverImage}
-                  alt={post.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition"
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full text-gray-500 text-sm">
-                  No image
-                </div>
-              )}
-
-              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                <p className="text-white font-semibold text-center px-3 line-clamp-2">
-                  {post.title}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+        <PostList
+          posts={posts}
+          loading={loading}
+          onPostClick={(post) => router.push(`/post/${post._id}`)}
+        />
       </main>
 
       {/* CREATE POST */}
