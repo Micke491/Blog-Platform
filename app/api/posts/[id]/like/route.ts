@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Post from "@/models/Post";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 export async function POST(
   req: NextRequest,
@@ -18,24 +19,34 @@ export async function POST(
     }
 
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
-    const userId = decoded.id;
+    const userId = decoded.userId || decoded.id;
 
     const post = await Post.findById(id);
     if (!post) {
       return NextResponse.json({ message: "Post not found" }, { status: 404 });
     }
 
-    // Toggle like
-    const likeIndex = post.likes.indexOf(userId);
+    // Convert userId to ObjectId for proper comparison
+    const userIdObjectId = new mongoose.Types.ObjectId(userId);
+    
+    // Toggle like - check if user already liked
+    const likeIndex = post.likes.findIndex(
+      (likeId) => likeId.toString() === userIdObjectId.toString()
+    );
+    
     if (likeIndex > -1) {
       post.likes.splice(likeIndex, 1); // Unlike
     } else {
-      post.likes.push(userId); // Like
+      post.likes.push(userIdObjectId); // Like
     }
 
     await post.save();
-    return NextResponse.json({ likes: post.likes.length }, { status: 200 });
+    return NextResponse.json({ 
+      likes: post.likes.length,
+      liked: likeIndex === -1 // true if we just liked, false if we just unliked
+    }, { status: 200 });
   } catch (error) {
+    console.error("Error processing like:", error);
     return NextResponse.json({ message: "Error processing like" }, { status: 500 });
   }
 }

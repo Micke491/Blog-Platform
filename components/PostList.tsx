@@ -7,7 +7,7 @@ type Post = {
   title: string;
   content: string;
   coverImage?: string;
-  author: { username: string };
+  author: { username: string; avatar?: string };
   createdAt: Date;
   likes: any[];
   tags?: string[];
@@ -106,9 +106,17 @@ export default function PostList({ posts, loading, onPostClick }: PostListProps)
             {/* Footer */}
             <div className="flex items-center justify-between pt-4 border-t border-white/10">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold">
-                  {post.author.username[0].toUpperCase()}
-                </div>
+                {post.author.avatar ? (
+                  <img
+                    src={post.author.avatar}
+                    alt={post.author.username}
+                    className="w-8 h-8 rounded-full object-cover border border-white/20"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold">
+                    {post.author.username[0].toUpperCase()}
+                  </div>
+                )}
                 <span className="text-sm text-gray-400">
                   {post.author.username}
                 </span>

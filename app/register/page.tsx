@@ -5,8 +5,10 @@ import { Button } from "@/components/button";
 import { Navbar } from "@/components/navbar";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/Toast";
 
 export default function RegisterPage() {
+  const { toast, Toast } = useToast();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -30,13 +32,17 @@ export default function RegisterPage() {
 
     // Validate passwords match
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      const errorMsg = "Passwords do not match";
+      setError(errorMsg);
+      toast(errorMsg, "error");
       return;
     }
 
     // Validate password length
     if (password.length < 6) {
-      setError("Password must be at least 6 characters");
+      const errorMsg = "Password must be at least 6 characters";
+      setError(errorMsg);
+      toast(errorMsg, "error");
       return;
     }
 
@@ -52,17 +58,21 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.message || "Registration failed");
+        const errorMsg = data.message || "Registration failed";
+        setError(errorMsg);
+        toast(errorMsg, "error");
         setLoading(false);
         return;
       }
 
       // Store token
       localStorage.setItem("token", data.token);
-      
-      router.push("/explore");
+      toast("Account created successfully! Welcome!", "success");
+      setTimeout(() => router.push("/explore"), 500);
     } catch (err) {
-      setError("Something went wrong. Please try again.");
+      const errorMsg = "Something went wrong. Please try again.";
+      setError(errorMsg);
+      toast(errorMsg, "error");
       setLoading(false);
     }
   };
@@ -197,6 +207,7 @@ export default function RegisterPage() {
           </div>
         </main>
       </div>
+      <Toast />
     </div>
   );
 }

@@ -5,8 +5,10 @@ import { Button } from "@/components/button";
 import { Navbar } from "@/components/navbar";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/Toast";
 
 export default function LoginPage() {
+  const { toast, Toast } = useToast();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,17 +39,21 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.message || "Login failed");
+        const errorMsg = data.message || "Login failed";
+        setError(errorMsg);
+        toast(errorMsg, "error");
         setLoading(false);
         return;
       }
 
       // Store token
       localStorage.setItem("token", data.token);
-      
-      router.push("/explore");
+      toast("Login successful! Welcome back!", "success");
+      setTimeout(() => router.push("/explore"), 500);
     } catch (err) {
-      setError("Something went wrong. Please try again.");
+      const errorMsg = "Something went wrong. Please try again.";
+      setError(errorMsg);
+      toast(errorMsg, "error");
       setLoading(false);
     }
   };
@@ -152,6 +158,7 @@ export default function LoginPage() {
           </div>
         </main>
       </div>
+      <Toast />
     </div>
   );
 }

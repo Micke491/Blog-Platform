@@ -6,13 +6,15 @@ import { Navbar } from "@/components/navbar";
 import PostList from "@/components/PostList";
 import SearchBar from "@/components/SearchBar";
 import TagCloud from "@/components/TagCloud";
+import { useToast } from "@/components/Toast";
+import { X, Heart, MessageCircle, Send } from "lucide-react";
 
 type Post = {
   _id: string;
   title: string;
   content: string;
   coverImage?: string;
-  author: { username: string };
+  author: { username: string; avatar?: string };
   createdAt: Date;
   likes: any[];
   tags?: string[];
@@ -31,6 +33,7 @@ export default function ExplorePage() {
   // Modal state
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [currentUsername, setCurrentUsername] = useState<string>("");
+  const [currentUserId, setCurrentUserId] = useState<string>("");
 
   // Auth guard
   useEffect(() => {
@@ -51,6 +54,7 @@ export default function ExplorePage() {
         const data = await response.json();
         if (data.username) {
           setCurrentUsername(data.username);
+          setCurrentUserId(data.id);
         }
       } catch (error) {
         console.error("Error fetching user:", error);
@@ -176,7 +180,6 @@ export default function ExplorePage() {
               <option value="likes">Most liked</option>
             </select>
 
-            {/* SearchBar - You'll need to uncomment this in your actual app */}
             <input
               type="text"
               value={search}
@@ -188,7 +191,6 @@ export default function ExplorePage() {
 
           {allTags.length > 0 && (
             <div className="max-w-7xl mx-auto px-6 pb-4">
-              {/* TagCloud - You'll need to uncomment this in your actual app */}
               <div className="flex flex-wrap gap-2">
                 {allTags.map((tag) => {
                   const active = selectedTags.includes(tag);
@@ -212,7 +214,6 @@ export default function ExplorePage() {
         </section>
 
         <main className="max-w-7xl mx-auto px-6 py-16">
-          {/* PostList - You'll need to import and use your actual component */}
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -270,9 +271,17 @@ export default function ExplorePage() {
 
                     <div className="flex items-center justify-between pt-4 border-t border-white/10">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold">
-                          {post.author.username[0].toUpperCase()}
-                        </div>
+                        {post.author.avatar ? (
+                          <img
+                            src={post.author.avatar}
+                            alt={post.author.username}
+                            className="w-8 h-8 rounded-full object-cover border border-white/20"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold">
+                            {post.author.username[0].toUpperCase()}
+                          </div>
+                        )}
                         <span className="text-sm text-gray-400">
                           {post.author.username}
                         </span>
@@ -294,22 +303,21 @@ export default function ExplorePage() {
         </footer>
       </div>
 
-      {/* Post Modal */}
       {selectedPost && (
         <PostModal
           post={selectedPost}
           onClose={handleCloseModal}
           currentUsername={currentUsername}
+          currentUserId={currentUserId}
         />
       )}
     </div>
   );
 }
 
-// PostModal Component (inline for demo)
-import { X, Heart, MessageCircle, Send } from "lucide-react";
-
-function PostModal({ post, onClose, currentUsername }: { post: Post | null; onClose: () => void; currentUsername?: string }) {
+// PostModal Component
+function PostModal({ post, onClose, currentUsername, currentUserId }: { post: Post | null; onClose: () => void; currentUsername?: string; currentUserId?: string }) {
+  const { toast, Toast } = useToast();
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [comments, setComments] = useState<any[]>([]);
@@ -319,7 +327,15 @@ function PostModal({ post, onClose, currentUsername }: { post: Post | null; onCl
   useEffect(() => {
     if (!post) return;
     setLikeCount(post.likes.length);
-    setLiked(false);
+    // Check if user has liked - handle both ObjectId and string formats
+    const hasLiked = currentUserId 
+      ? post.likes.some((likeId: any) => {
+          if (!likeId) return false;
+          const likeIdStr = typeof likeId === 'string' ? likeId : likeId.toString();
+          return likeIdStr === currentUserId;
+        })
+      : false;
+    setLiked(hasLiked);
     
     // Fetch comments from API
     async function fetchComments() {
@@ -339,7 +355,7 @@ function PostModal({ post, onClose, currentUsername }: { post: Post | null; onCl
     }
     
     fetchComments();
-  }, [post]);
+  }, [post, currentUserId]);
 
   if (!post) return null;
 
@@ -355,15 +371,27 @@ function PostModal({ post, onClose, currentUsername }: { post: Post | null; onCl
         },
       });
       const data = await response.json();
-      setLikeCount(data.likes);
-      setLiked(!liked);
+      if (response.ok) {
+        setLikeCount(data.likes);
+        const newLikedState = data.liked !== undefined ? data.liked : !liked;
+        setLiked(newLikedState);
+        toast(newLikedState ? "Post liked!" : "Post unliked", "success");
+      } else {
+        toast("Failed to like post", "error");
+      }
     } catch (error) {
       console.error("Error toggling like:", error);
+      toast("Failed to like post", "error");
     }
   };
 
   const handleSubmitComment = async () => {
-    if (!newComment.trim() || isSubmitting || !post) return;
+    if (!newComment.trim() || isSubmitting || !post) {
+      if (!newComment.trim()) {
+        toast("Please enter a comment", "error");
+      }
+      return;
+    }
     setIsSubmitting(true);
     
     try {
@@ -380,9 +408,13 @@ function PostModal({ post, onClose, currentUsername }: { post: Post | null; onCl
       if (data.comment) {
         setComments([data.comment, ...comments]);
         setNewComment("");
+        toast("Comment posted!", "success");
+      } else {
+        toast(data.message || "Failed to post comment", "error");
       }
     } catch (error) {
       console.error("Error submitting comment:", error);
+      toast("Failed to post comment", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -411,9 +443,17 @@ function PostModal({ post, onClose, currentUsername }: { post: Post | null; onCl
           <div className={`${post.coverImage ? 'md:w-1/2' : 'w-full'} flex flex-col`}>
             <div className="p-6 border-b border-white/10">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
-                  {post.author.username[0].toUpperCase()}
-                </div>
+                {post.author.avatar ? (
+                  <img
+                    src={post.author.avatar}
+                    alt={post.author.username}
+                    className="w-10 h-10 rounded-full object-cover border border-white/20"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                    {post.author.username[0].toUpperCase()}
+                  </div>
+                )}
                 <div>
                   <p className="font-semibold text-white">{post.author.username}</p>
                   <p className="text-xs text-gray-400">
@@ -437,7 +477,7 @@ function PostModal({ post, onClose, currentUsername }: { post: Post | null; onCl
               <div className="flex items-center gap-6 pt-3">
                 <button
                   onClick={handleLike}
-                  className={`flex items-center gap-2 transition-all ${liked ? "text-pink-500" : "text-gray-400 hover:text-pink-400"}`}
+                  className={`flex items-center gap-2 transition-all cursor-pointer ${liked ? "text-pink-500" : "text-gray-400 hover:text-pink-400"}`}
                 >
                   <Heart size={22} fill={liked ? "currentColor" : "none"} />
                   <span className="font-semibold">{likeCount}</span>
@@ -458,9 +498,17 @@ function PostModal({ post, onClose, currentUsername }: { post: Post | null; onCl
                   {comments.map((comment) => (
                     <div key={comment._id} className="p-4 rounded-2xl bg-white/5 border border-white/10">
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold">
-                          {comment.author.username[0].toUpperCase()}
-                        </div>
+                        {comment.author?.avatar ? (
+                          <img
+                            src={comment.author.avatar}
+                            alt={comment.author.username}
+                            className="w-8 h-8 rounded-full object-cover border border-white/20"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold">
+                            {comment.author.username[0].toUpperCase()}
+                          </div>
+                        )}
                         <p className="font-semibold text-white text-sm">{comment.author.username}</p>
                       </div>
                       <p className="text-gray-300 text-sm">{comment.content}</p>
@@ -483,7 +531,7 @@ function PostModal({ post, onClose, currentUsername }: { post: Post | null; onCl
                 <button
                   onClick={handleSubmitComment}
                   disabled={!newComment.trim()}
-                  className="px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white disabled:opacity-50"
+                  className={`px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white disabled:opacity-50 ${!newComment.trim() ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                 >
                   <Send size={18} />
                 </button>
@@ -492,6 +540,7 @@ function PostModal({ post, onClose, currentUsername }: { post: Post | null; onCl
           </div>
         </div>
       </div>
+      <Toast />
     </div>
   );
 }

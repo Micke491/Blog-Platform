@@ -11,12 +11,12 @@ export async function GET(
     const { id } = await params;
     
     const post = await Post.findById(id)
-      .populate('author', 'username')
+      .populate('author', 'username avatar')
       .populate({
         path: 'comments',
         populate: {
           path: 'author',
-          select: 'username'
+          select: 'username avatar'
         }
       });
 

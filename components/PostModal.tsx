@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { X, Heart, MessageCircle, Send } from "lucide-react";
+import { useToast } from "@/components/Toast";
 
 type Post = {
   _id: string;
   title: string;
   content: string;
   coverImage?: string;
-  author: { username: string };
+  author: { username: string; avatar?: string };
   createdAt: Date;
   likes: any[];
   tags?: string[];
@@ -17,7 +18,7 @@ type Post = {
 type Comment = {
   _id: string;
   content: string;
-  author: { username: string };
+  author: { username: string; avatar?: string };
   createdAt: Date;
 };
 
@@ -29,6 +30,7 @@ interface PostModalProps {
 }
 
 export default function PostModal({ post, onClose, currentUsername, currentUserId }: PostModalProps) {
+  const { toast, Toast } = useToast();
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -40,7 +42,15 @@ export default function PostModal({ post, onClose, currentUsername, currentUserI
 
     // Initialize like state
     setLikeCount(post.likes.length);
-    setLiked(currentUserId ? post.likes.includes(currentUserId) : false);
+    // Check if user has liked - handle both ObjectId and string formats
+    const hasLiked = currentUserId 
+      ? post.likes.some((likeId: any) => {
+          if (!likeId) return false;
+          const likeIdStr = typeof likeId === 'string' ? likeId : likeId.toString();
+          return likeIdStr === currentUserId;
+        })
+      : false;
+    setLiked(hasLiked);
 
     // Fetch comments from API
     async function fetchComments() {
@@ -60,7 +70,7 @@ export default function PostModal({ post, onClose, currentUsername, currentUserI
     }
     
     fetchComments();
-  }, [post]);
+  }, [post, currentUserId]);
 
   if (!post) return null;
 
@@ -74,15 +84,27 @@ export default function PostModal({ post, onClose, currentUsername, currentUserI
         },
       });
       const data = await response.json();
-      setLikeCount(data.likes);
-      setLiked(!liked);
+      if (response.ok) {
+        setLikeCount(data.likes);
+        const newLikedState = data.liked !== undefined ? data.liked : !liked;
+        setLiked(newLikedState);
+        toast(newLikedState ? "Post liked!" : "Post unliked", "success");
+      } else {
+        toast("Failed to like post", "error");
+      }
     } catch (error) {
       console.error("Error toggling like:", error);
+      toast("Failed to like post", "error");
     }
   };
 
   const handleSubmitComment = async () => {
-    if (!newComment.trim() || isSubmitting) return;
+    if (!newComment.trim() || isSubmitting) {
+      if (!newComment.trim()) {
+        toast("Please enter a comment", "error");
+      }
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -100,9 +122,13 @@ export default function PostModal({ post, onClose, currentUsername, currentUserI
       if (data.comment) {
         setComments([data.comment, ...comments]);
         setNewComment("");
+        toast("Comment posted!", "success");
+      } else {
+        toast(data.message || "Failed to post comment", "error");
       }
     } catch (error) {
       console.error("Error submitting comment:", error);
+      toast("Failed to post comment", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -152,9 +178,17 @@ export default function PostModal({ post, onClose, currentUsername, currentUserI
             {/* Header */}
             <div className="p-6 border-b border-white/10">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
-                  {post.author.username[0].toUpperCase()}
-                </div>
+                {post.author.avatar ? (
+                  <img
+                    src={post.author.avatar}
+                    alt={post.author.username}
+                    className="w-10 h-10 rounded-full object-cover border border-white/20"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                    {post.author.username[0].toUpperCase()}
+                  </div>
+                )}
                 <div>
                   <p className="font-semibold text-white">{post.author.username}</p>
                   <p className="text-xs text-gray-400">
@@ -228,9 +262,17 @@ export default function PostModal({ post, onClose, currentUsername, currentUserI
                       className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all"
                     >
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold">
-                          {comment.author.username[0].toUpperCase()}
-                        </div>
+                        {comment.author.avatar ? (
+                          <img
+                            src={comment.author.avatar}
+                            alt={comment.author.username}
+                            className="w-8 h-8 rounded-full object-cover border border-white/20"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold">
+                            {comment.author.username[0].toUpperCase()}
+                          </div>
+                        )}
                         <div>
                           <p className="font-semibold text-white text-sm">
                             {comment.author.username}
@@ -281,6 +323,7 @@ export default function PostModal({ post, onClose, currentUsername, currentUserI
           </div>
         </div>
       </div>
+      <Toast />
     </div>
   );
 }

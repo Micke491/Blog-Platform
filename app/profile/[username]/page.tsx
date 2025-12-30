@@ -97,9 +97,17 @@ export default function ProfilePage() {
       {/* HEADER */}
       <section className="max-w-6xl mx-auto px-6 pt-28 pb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div className="flex items-center gap-5">
-          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-3xl font-black">
-            {user.username[0].toUpperCase()}
-          </div>
+          {user.avatar ? (
+            <img
+              src={user.avatar}
+              alt={user.username}
+              className="w-24 h-24 rounded-full object-cover border-2 border-white/20"
+            />
+          ) : (
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-3xl font-black">
+              {user.username[0].toUpperCase()}
+            </div>
+          )}
 
           <div>
             <h1 className="text-4xl font-black">{user.username}</h1>
@@ -114,15 +122,15 @@ export default function ProfilePage() {
 
         <div className="flex gap-3">
           <button
-            onClick={() => router.push("/profile/edit")}
-            className="px-6 py-2 rounded-full border border-white/20 hover:bg-white/10 transition"
+            onClick={() => router.push("/profile/edit-profile")}
+            className="px-6 py-2 rounded-full border border-white/20 hover:bg-white/10 transition cursor-pointer"
           >
             Edit Profile
           </button>
 
           <button
             onClick={logout}
-            className="px-6 py-2 rounded-full border border-red-400/40 text-red-400 hover:bg-red-500/20 transition"
+            className="px-6 py-2 rounded-full border border-red-400/40 text-red-400 hover:bg-red-500/20 transition cursor-pointer"
           >
             Logout
           </button>
@@ -147,7 +155,7 @@ export default function ProfilePage() {
       {/* CREATE POST */}
       <button
         onClick={() => router.push("/profile/editor")}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 text-white text-3xl flex items-center justify-center shadow-2xl hover:scale-110 transition"
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 text-white text-3xl flex items-center justify-center shadow-2xl hover:scale-110 transition cursor-pointer"
       >
         +
       </button>

@@ -23,8 +23,6 @@ export default function HomePage() {
     { icon: "📊", title: "Analytics", desc: "Track your content performance" }
   ];
 
-  const trendingTopics = ["Technology", "Travel", "Lifestyle", "Food", "Art", "Music"];
-
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden">
       {/* Animated gradient background */}

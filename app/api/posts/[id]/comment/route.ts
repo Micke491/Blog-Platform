@@ -18,7 +18,7 @@ export async function GET(
     }
 
     const comments = await Comment.find({ post: id })
-      .populate('author', 'username')
+      .populate('author', 'username avatar')
       .sort({ createdAt: -1 });
 
     return NextResponse.json({ comments }, { status: 200 });
@@ -41,7 +41,7 @@ export async function POST(
     }
 
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
-    const userId = decoded.id;
+    const userId = decoded.userId || decoded.id;
 
     const { content } = await req.json();
     
@@ -63,7 +63,7 @@ export async function POST(
     post.comments.push(comment._id);
     await post.save();
 
-    await comment.populate('author', 'username');
+    await comment.populate('author', 'username avatar');
 
     return NextResponse.json({ comment }, { status: 201 });
   } catch (error) {
