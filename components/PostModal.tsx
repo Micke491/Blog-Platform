@@ -29,7 +29,12 @@ interface PostModalProps {
   currentUserId?: string;
 }
 
-export default function PostModal({ post, onClose, currentUsername, currentUserId }: PostModalProps) {
+export default function PostModal({
+  post,
+  onClose,
+  currentUsername,
+  currentUserId,
+}: PostModalProps) {
   const { toast, Toast } = useToast();
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
@@ -39,19 +44,20 @@ export default function PostModal({ post, onClose, currentUsername, currentUserI
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [isDeletingPost, setIsDeletingPost] = useState(false);
 
-  const isAuthor = currentUserId && (
-    post?.author._id === currentUserId || 
-    post?.author.username === currentUsername
-  );
+  const isAuthor =
+    currentUserId &&
+    (post?.author._id === currentUserId ||
+      post?.author.username === currentUsername);
 
   useEffect(() => {
     if (!post) return;
 
     setLikeCount(post.likes.length);
-    const hasLiked = currentUserId 
+    const hasLiked = currentUserId
       ? post.likes.some((likeId: any) => {
           if (!likeId) return false;
-          const likeIdStr = typeof likeId === 'string' ? likeId : likeId.toString();
+          const likeIdStr =
+            typeof likeId === "string" ? likeId : likeId.toString();
           return likeIdStr === currentUserId;
         })
       : false;
@@ -62,7 +68,7 @@ export default function PostModal({ post, onClose, currentUsername, currentUserI
         const token = localStorage.getItem("token");
         const response = await fetch(`/api/posts/${post!._id}/comment`, {
           headers: {
-            "Authorization": `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         });
         const data = await response.json();
@@ -72,14 +78,19 @@ export default function PostModal({ post, onClose, currentUsername, currentUserI
         setComments([]);
       }
     }
-    
+
     fetchComments();
   }, [post, currentUserId]);
 
   if (!post) return null;
 
   const handleDeletePost = async () => {
-    if (!confirm("Are you sure you want to delete this post? This action is permanent.")) return;
+    if (
+      !confirm(
+        "Are you sure you want to delete this post? This action is permanent."
+      )
+    )
+      return;
 
     setIsDeletingPost(true);
     try {
@@ -87,14 +98,13 @@ export default function PostModal({ post, onClose, currentUsername, currentUserI
       const response = await fetch(`/api/posts/${post._id}`, {
         method: "DELETE",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
       if (response.ok) {
         toast("Post deleted successfully", "success");
         onClose();
-        
       } else {
         const data = await response.json();
         toast(data.message || "Failed to delete post", "error");
@@ -113,13 +123,14 @@ export default function PostModal({ post, onClose, currentUsername, currentUserI
       const response = await fetch(`/api/posts/${post!._id}/like`, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       const data = await response.json();
       if (response.ok) {
         setLikeCount(data.likes);
-        const newLikedState = data.liked !== undefined ? data.liked : !liked;
+        const newLikedState =
+          data.liked !== undefined ? data.liked : !liked;
         setLiked(newLikedState);
         toast(newLikedState ? "Post liked!" : "Post unliked", "success");
       }
@@ -135,7 +146,7 @@ export default function PostModal({ post, onClose, currentUsername, currentUserI
       const token = localStorage.getItem("token");
       const response = await fetch(`/api/comments/${commentId}`, {
         method: "DELETE",
-        headers: { "Authorization": `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {
         setComments((prev) => prev.filter((c) => c._id !== commentId));
@@ -157,7 +168,7 @@ export default function PostModal({ post, onClose, currentUsername, currentUserI
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ content: newComment }),
       });
@@ -175,7 +186,7 @@ export default function PostModal({ post, onClose, currentUsername, currentUserI
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmitComment();
     }
@@ -191,7 +202,6 @@ export default function PostModal({ post, onClose, currentUsername, currentUserI
       onClick={handleBackdropClick}
     >
       <div className="relative w-full max-w-5xl max-h-[90vh] bg-gradient-to-br from-gray-900 to-black rounded-3xl border border-white/20 shadow-2xl overflow-hidden">
-        
         {/* Top Controls (Delete & Close) */}
         <div className="absolute top-4 right-4 z-10 flex gap-2">
           {isAuthor && (
@@ -229,7 +239,11 @@ export default function PostModal({ post, onClose, currentUsername, currentUserI
           )}
 
           {/* Right Side - Content */}
-          <div className={`${post.coverImage ? 'md:w-1/2' : 'w-full'} flex flex-col`}>
+          <div
+            className={`${
+              post.coverImage ? "md:w-1/2" : "w-full"
+            } flex flex-col`}
+          >
             {/* Header */}
             <div className="p-6 border-b border-white/10">
               <div className="flex items-center gap-3 mb-4">
@@ -245,21 +259,30 @@ export default function PostModal({ post, onClose, currentUsername, currentUserI
                   </div>
                 )}
                 <div>
-                  <p className="font-semibold text-white">{post.author.username}</p>
+                  <p className="font-semibold text-white">
+                    {post.author.username}
+                  </p>
                   <p className="text-xs text-gray-400">
-                    {new Date(post.createdAt).toLocaleDateString('en-US', {
-                      month: 'short', day: 'numeric', year: 'numeric'
+                    {new Date(post.createdAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
                     })}
                   </p>
                 </div>
               </div>
 
-              <h2 className="text-2xl font-bold text-white mb-3">{post.title}</h2>
+              <h2 className="text-2xl font-bold text-white mb-3">
+                {post.title}
+              </h2>
 
               {post.tags && (
                 <div className="flex flex-wrap gap-2 mb-3">
                   {post.tags.map((tag) => (
-                    <span key={tag} className="px-3 py-1 rounded-full text-xs bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                    <span
+                      key={tag}
+                      className="px-3 py-1 rounded-full text-xs bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                    >
                       #{tag}
                     </span>
                   ))}
@@ -270,7 +293,11 @@ export default function PostModal({ post, onClose, currentUsername, currentUserI
               <div className="flex items-center gap-6 pt-3">
                 <button
                   onClick={handleLike}
-                  className={`flex items-center gap-2 transition-all cursor-pointer ${liked ? "text-pink-500 scale-110" : "text-gray-400 hover:text-pink-400"}`}
+                  className={`flex items-center gap-2 transition-all cursor-pointer ${
+                    liked
+                      ? "text-pink-500 scale-110"
+                      : "text-gray-400 hover:text-pink-400"
+                  }`}
                 >
                   <Heart size={22} fill={liked ? "currentColor" : "none"} />
                   <span className="font-semibold">{likeCount}</span>
@@ -285,24 +312,43 @@ export default function PostModal({ post, onClose, currentUsername, currentUserI
             {/* Scrollable Area */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               <div className="prose prose-invert max-w-none">
-                <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{post.content}</p>
+                <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">
+                  {post.content}
+                </p>
               </div>
 
               {/* Comments */}
               <div className="border-t border-white/10 pt-6">
-                <h3 className="text-lg font-bold text-white mb-4">Comments ({comments.length})</h3>
+                <h3 className="text-lg font-bold text-white mb-4">
+                  Comments ({comments.length})
+                </h3>
                 <div className="space-y-4">
                   {comments.map((comment) => {
-                    const isCommentOwner = currentUserId && comment.author?._id === currentUserId;
+                    const isCommentOwner =
+                      currentUserId && comment.author?._id === currentUserId;
                     return (
-                      <div key={comment._id} className="p-4 rounded-2xl bg-white/5 border border-white/10 group">
+                      <div
+                        key={comment._id}
+                        className="p-4 rounded-2xl bg-white/5 border border-white/10 group"
+                      >
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-2 mb-2">
-                            <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs text-white">
-                              {comment.author.username[0].toUpperCase()}
-                            </div>
+                            {/* User Avatar in Comment */}
+                            {comment.author.avatar ? (
+                              <img
+                                src={comment.author.avatar}
+                                alt={comment.author.username}
+                                className="w-8 h-8 rounded-full object-cover border border-white/20"
+                              />
+                            ) : (
+                              <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs text-white">
+                                {comment.author.username[0].toUpperCase()}
+                              </div>
+                            )}
                             <div>
-                              <p className="font-semibold text-white text-sm">{comment.author.username}</p>
+                              <p className="font-semibold text-white text-sm">
+                                {comment.author.username}
+                              </p>
                             </div>
                           </div>
                           {isCommentOwner && (
@@ -314,7 +360,9 @@ export default function PostModal({ post, onClose, currentUsername, currentUserI
                             </button>
                           )}
                         </div>
-                        <p className="text-gray-300 text-sm pl-10">{comment.content}</p>
+                        <p className="text-gray-300 text-sm pl-10">
+                          {comment.content}
+                        </p>
                       </div>
                     );
                   })}

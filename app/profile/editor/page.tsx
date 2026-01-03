@@ -125,7 +125,16 @@ export default function EditorPage() {
       <Navbar />
 
       <main className="max-w-3xl mx-auto px-6 pt-32 space-y-6">
-        <h1 className="text-4xl font-black">Create Post</h1>
+        {/* Header with Cancel Button */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-4xl font-black">Create Post</h1>
+          <button
+            onClick={() => router.back()}
+            className="px-4 py-2 rounded-full border border-white/20 hover:bg-white/10 transition cursor-pointer text-sm font-medium"
+          >
+            Cancel
+          </button>
+        </div>
 
         <input
           value={title}
@@ -143,7 +152,9 @@ export default function EditorPage() {
         />
 
         <div className="space-y-2">
-          <label className="text-sm text-gray-400">Tags (press Enter or comma to add)</label>
+          <label className="text-sm text-gray-400">
+            Tags (press Enter or comma to add)
+          </label>
           <div className="flex flex-wrap gap-2 p-3 bg-white/5 border border-white/20 rounded-xl min-h-[3rem]">
             {tags.map((tag) => (
               <span
@@ -184,13 +195,17 @@ export default function EditorPage() {
         {uploading && <p className="text-gray-400">Uploading image...</p>}
 
         {image && (
-          <img src={image} className="rounded-xl max-h-80 object-cover" />
+          <img
+            src={image}
+            alt="Preview"
+            className="rounded-xl max-h-80 object-cover"
+          />
         )}
 
         <button
           onClick={publish}
           disabled={loading || uploading}
-          className="w-full py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 font-semibold hover:scale-[1.02] transition cursor-pointer"
+          className="w-full py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 font-semibold hover:scale-[1.02] transition cursor-pointer disabled:opacity-50 disabled:hover:scale-100"
         >
           {loading ? "Posting..." : uploading ? "Uploading..." : "Post"}
         </button>
