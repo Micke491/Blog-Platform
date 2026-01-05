@@ -2,6 +2,8 @@
 
 A modern, full-stack blog platform built with Next.js, TypeScript, and MongoDB. Features user authentication, post creation and editing, commenting, liking, and image uploads via Cloudinary.
 
+**Live Demo**: [https://blog-platform-mu-navy.vercel.app/]
+
 ## Features
 
 - **User Authentication**: Secure login and registration with JWT tokens
@@ -61,21 +63,7 @@ A modern, full-stack blog platform built with Next.js, TypeScript, and MongoDB. 
    pnpm install
    ```
 
-3. **Set up environment variables:**
-
-   Create a `.env.local` file in the root directory and add the following variables:
-
-   ```env
-   MONGODB_URI=your_mongodb_connection_string
-   JWT_SECRET=your_jwt_secret_key
-   CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
-   CLOUDINARY_API_KEY=your_cloudinary_api_key
-   CLOUDINARY_API_SECRET=your_cloudinary_api_secret
-   ```
-
-   Replace the values with your actual credentials.
-
-4. **Run the development server:**
+3. **Run the development server:**
    ```bash
    npm run dev
    # or
@@ -85,31 +73,6 @@ A modern, full-stack blog platform built with Next.js, TypeScript, and MongoDB. 
    ```
 
    Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## Deployment to Vercel
-
-This project is optimized for deployment on Vercel. Follow these steps:
-
-1. **Push your code to GitHub** (if not already done).
-
-2. **Connect to Vercel:**
-   - Go to [vercel.com](https://vercel.com) and sign in.
-   - Click "New Project" and import your GitHub repository.
-
-3. **Configure Environment Variables:**
-   - In your Vercel project settings, go to "Environment Variables".
-   - Add the same environment variables as in your `.env.local`:
-     - `MONGODB_URI`
-     - `JWT_SECRET`
-     - `CLOUDINARY_CLOUD_NAME`
-     - `CLOUDINARY_API_KEY`
-     - `CLOUDINARY_API_SECRET`
-
-4. **Deploy:**
-   - Vercel will automatically detect it's a Next.js project and deploy it.
-   - Your app will be live at `https://your-project-name.vercel.app`.
-
-For more details, check the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying).
 
 ## API Endpoints
 
