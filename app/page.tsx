@@ -1,17 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/button"
 import Link from "next/link"
 
 export default function HomePage() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const orbRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
+      if (orbRef.current) {
+        orbRef.current.style.left = `${e.clientX - 192}px`;
+        orbRef.current.style.top = `${e.clientY - 192}px`;
+      }
     };
+
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
@@ -30,12 +34,9 @@ export default function HomePage() {
       
       {/* Moving gradient orbs */}
       <div 
-        className="fixed w-96 h-96 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 blur-3xl opacity-20 transition-all duration-1000 ease-out"
-        style={{
-          left: `${mousePosition.x - 192}px`,
-          top: `${mousePosition.y - 192}px`,
-          pointerEvents: 'none'
-        }}
+        ref={orbRef}
+        className="fixed w-96 h-96 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 blur-3xl opacity-20 pointer-events-none"
+        style={{ left: '-50%', top: '-50%' }}
       ></div>
       
       <div className="relative z-10">
