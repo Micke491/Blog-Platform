@@ -4,10 +4,7 @@ import Post from "@/models/Post";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectDB();
     const { id } = await params;

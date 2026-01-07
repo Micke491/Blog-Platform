@@ -147,9 +147,13 @@ export default function EditorPage() {
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={8}
+          maxLength={500}
           placeholder="Write something..."
           className="w-full bg-white/5 border border-white/20 rounded-xl p-4"
         />
+        <p className="text-xs text-gray-500 text-right -mt-4">
+          {content.length}/500
+        </p>
 
         <div className="space-y-2">
           <label className="text-sm text-gray-400">

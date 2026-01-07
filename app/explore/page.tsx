@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import PostModal from "@/components/PostModal";
+import { Search, Plus, Filter, ChevronDown } from "lucide-react";
 
 type Post = {
   _id: string;
@@ -25,7 +26,7 @@ export default function ExplorePage() {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<"latest" | "likes">("latest");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  
+
   // Modal state
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [currentUsername, setCurrentUsername] = useState<string>("");
@@ -38,13 +39,13 @@ export default function ExplorePage() {
       router.replace("/login");
       return;
     }
-    
+
     // Get current username from API
     async function fetchUser() {
       try {
         const response = await fetch("/api/me", {
           headers: {
-            "Authorization": `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         });
         const data = await response.json();
@@ -56,45 +57,50 @@ export default function ExplorePage() {
         console.error("Error fetching user:", error);
       }
     }
-    
+
     setIsAuthenticated(true);
     fetchUser();
   }, [router]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
-
-    async function load() {
-      setLoading(true);
-
-      try {
-        const token = localStorage.getItem("token");
-        const response = await fetch("/api/posts", {
-          headers: {
-            "Authorization": `Bearer ${token}`,
-          },
-        });
-        const data = await response.json();
-        setPosts(data.posts || []);
-      } catch (error) {
-        console.error("Error fetching posts:", error);
-        setPosts([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    load();
-
-    // Refetch posts when window regains focus (e.g., returning from post modal)
-    const handleFocus = () => load();
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
+    loadPosts();
+    
+    const handleFocus = () => loadPosts();
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
   }, [isAuthenticated]);
 
-  const allTags = Array.from(
-    new Set(posts.flatMap((p) => p.tags || []))
-  );
+  async function loadPosts() {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("/api/posts", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      setPosts(data.posts || []);
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+      setPosts([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Update a specific post in the local state (passed to Modal)
+  const handlePostUpdate = (updatedPost: Post | null) => {
+    if (!updatedPost) return;
+    setPosts((prevPosts) =>
+      prevPosts.map((p) => (p._id === updatedPost._id ? updatedPost : p))
+    );
+    // Also update the selected post so the modal stays in sync
+    setSelectedPost(updatedPost);
+  };
+
+  const allTags = Array.from(new Set(posts.flatMap((p) => p.tags || [])));
 
   const filteredPosts = posts
     .filter((post) => {
@@ -113,29 +119,24 @@ export default function ExplorePage() {
         return b.likes.length - a.likes.length;
       }
       return (
-        new Date(b.createdAt).getTime() -
-        new Date(a.createdAt).getTime()
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
     });
 
   function toggleTag(tag: string) {
     setSelectedTags((prev) =>
-      prev.includes(tag)
-        ? prev.filter((t) => t !== tag)
-        : [...prev, tag]
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
   }
 
   function handlePostClick(post: Post) {
     setSelectedPost(post);
-    // Prevent body scroll when modal is open
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = "hidden";
   }
 
   function handleCloseModal() {
     setSelectedPost(null);
-    // Restore body scroll
-    document.body.style.overflow = 'unset';
+    document.body.style.overflow = "unset";
   }
 
   if (!isAuthenticated) {
@@ -163,30 +164,58 @@ export default function ExplorePage() {
           </p>
         </section>
 
-        <section className="sticky top-20 z-20 backdrop-blur-md bg-black/40 border-y border-white/10">
-          <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <select
-              value={sort}
-              onChange={(e) =>
-                setSort(e.target.value as "latest" | "likes")
-              }
-              className="w-40 rounded-full bg-white/5 border border-white/20 px-4 py-2 text-sm text-white focus:outline-none focus:border-pink-400"
-            >
-              <option value="latest">Latest</option>
-              <option value="likes">Most liked</option>
-            </select>
+        {/* --- CONTROL BAR --- */}
+        <section className="sticky top-20 z-20 backdrop-blur-xl bg-black/60 border-y border-white/10 shadow-lg">
+          <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            
+            {/* Left Side: Sort Dropdown */}
+            <div className="relative w-full md:w-auto group">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <Filter size={16} />
+              </div>
+              <select
+                value={sort}
+                onChange={(e) =>
+                  setSort(e.target.value as "latest" | "likes")
+                }
+                className="w-full md:w-48 appearance-none bg-white/5 hover:bg-white/10 border border-white/10 rounded-full py-2.5 pl-10 pr-10 text-sm text-white focus:outline-none focus:border-pink-500/50 transition-all cursor-pointer"
+              >
+                <option value="latest" className="bg-gray-900">Latest Posts</option>
+                <option value="likes" className="bg-gray-900">Most Liked</option>
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                <ChevronDown size={16} />
+              </div>
+            </div>
 
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search posts..."
-              className="flex-1 max-w-md rounded-full bg-white/5 border border-white/20 px-4 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-pink-400"
-            />
+            {/* Right Side: Search & Create Button */}
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              <div className="relative flex-1 md:w-80">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  <Search size={18} />
+                </div>
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search topics..."
+                  className="w-full bg-white/5 hover:bg-white/10 border border-white/10 rounded-full py-2.5 pl-10 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-pink-500/50 transition-all"
+                />
+              </div>
+
+              <button
+                onClick={() => router.push("/profile/editor")}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold shadow-lg shadow-purple-500/20 transition-all hover:scale-105 active:scale-95 shrink-0 cursor-pointer"
+              >
+                <Plus size={20} />
+                <span className="hidden sm:inline">Create</span>
+              </button>
+            </div>
           </div>
 
+          {/* Tags */}
           {allTags.length > 0 && (
-            <div className="max-w-7xl mx-auto px-6 pb-4">
+            <div className="max-w-7xl mx-auto px-6 pb-4 pt-2 border-t border-white/5">
               <div className="flex flex-wrap gap-2">
                 {allTags.map((tag) => {
                   const active = selectedTags.includes(tag);
@@ -194,10 +223,10 @@ export default function ExplorePage() {
                     <button
                       key={tag}
                       onClick={() => toggleTag(tag)}
-                      className={`px-4 py-1.5 rounded-full text-sm transition-all ${
+                      className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
                         active
-                          ? "bg-pink-500 text-white"
-                          : "bg-white/5 text-gray-300 hover:bg-white/10"
+                          ? "bg-pink-500 text-white shadow-lg shadow-pink-500/25"
+                          : "bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
                       }`}
                     >
                       #{tag}
@@ -230,38 +259,32 @@ export default function ExplorePage() {
                 <div
                   key={post._id}
                   onClick={() => handlePostClick(post)}
-                  className="group bg-white/5 border border-white/10 rounded-3xl overflow-hidden hover:border-pink-400/50 hover:shadow-2xl hover:shadow-pink-500/20 transition-all duration-300 cursor-pointer transform hover:-translate-y-2"
+                  className="group bg-white/5 border border-white/10 rounded-3xl overflow-hidden hover:border-pink-500/30 hover:shadow-2xl hover:shadow-pink-500/10 transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
                 >
                   {post.coverImage && (
                     <div className="relative h-48 overflow-hidden">
                       <img
                         src={post.coverImage}
                         alt={post.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                      
+                      {/* Floating Category Badge (First Tag) */}
+                      {post.tags && post.tags.length > 0 && (
+                        <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-xs font-medium text-white">
+                            #{post.tags[0]}
+                        </div>
+                      )}
                     </div>
                   )}
 
                   <div className="p-6">
-                    {post.tags && post.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {post.tags.slice(0, 2).map((tag) => (
-                          <span
-                            key={tag}
-                            className="px-2 py-1 rounded-full text-xs bg-purple-500/20 text-purple-300 border border-purple-500/30"
-                          >
-                            #{tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
                     <h3 className="text-xl font-bold text-white mb-2 line-clamp-2 group-hover:text-pink-400 transition-colors">
                       {post.title}
                     </h3>
 
-                    <p className="text-gray-400 text-sm line-clamp-3 mb-4">
+                    <p className="text-gray-400 text-sm line-clamp-3 mb-4 leading-relaxed">
                       {post.content}
                     </p>
 
@@ -278,12 +301,12 @@ export default function ExplorePage() {
                             {post.author.username[0].toUpperCase()}
                           </div>
                         )}
-                        <span className="text-sm text-gray-400">
+                        <span className="text-sm text-gray-400 group-hover:text-white transition-colors">
                           {post.author.username}
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-2 text-gray-400 text-sm">
+                      <div className="flex items-center gap-2 text-gray-500 text-sm">
                         <span>❤️ {post.likes.length}</span>
                       </div>
                     </div>
@@ -305,6 +328,7 @@ export default function ExplorePage() {
           onClose={handleCloseModal}
           currentUsername={currentUsername}
           currentUserId={currentUserId}
+          onPostUpdated={handlePostUpdate}
         />
       )}
     </div>
