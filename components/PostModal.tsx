@@ -60,14 +60,12 @@ export default function PostModal({
     (displayPost?.author?._id === currentUserId ||
       displayPost?.author.username === currentUsername);
 
-  // Cleanup body overflow on unmount
   useEffect(() => {
     return () => {
       document.body.style.overflow = "unset";
     };
   }, []);
 
-  // Handle ESC key to close modal
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && !isEditing) onClose();
@@ -288,7 +286,7 @@ export default function PostModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-0 sm:p-4"
       onClick={handleBackdropClick}
     >
       <style jsx>{`
@@ -301,35 +299,36 @@ export default function PostModal({
         }
       `}</style>
 
-      <div className="relative w-full max-w-5xl h-[90vh] bg-gradient-to-br from-gray-900 to-black rounded-3xl border border-white/20 shadow-2xl overflow-hidden flex flex-col">
-        <div className="absolute top-4 right-4 z-10 flex gap-2">
+      <div className="relative w-full h-full sm:h-[90vh] sm:max-w-5xl bg-gradient-to-br from-gray-900 to-black sm:rounded-3xl border-0 sm:border border-white/20 shadow-2xl overflow-hidden flex flex-col">
+        {/* Action Buttons - Moved to top on mobile */}
+        <div className="absolute top-2 sm:top-4 right-2 sm:right-4 z-10 flex gap-1 sm:gap-2">
           {isAuthor && (
             <>
               {!isEditing ? (
                 <button
                   onClick={handleStartEdit}
-                  className="p-2 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 transition-all cursor-pointer"
+                  className="p-1.5 sm:p-2 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 transition-all cursor-pointer"
                   title="Edit post"
                 >
-                  <Edit2 size={24} />
+                  <Edit2 size={20} className="sm:w-6 sm:h-6" />
                 </button>
               ) : (
                 <>
                   <button
                     onClick={() => setIsEditing(false)}
-                    className="p-2 rounded-full bg-gray-500/10 hover:bg-gray-500/20 text-gray-400 border border-gray-500/20 transition-all cursor-pointer"
+                    className="p-1.5 sm:p-2 rounded-full bg-gray-500/10 hover:bg-gray-500/20 text-gray-400 border border-gray-500/20 transition-all cursor-pointer"
                     title="Cancel edit"
                     disabled={isSaving}
                   >
-                    <XCircle size={24} />
+                    <XCircle size={20} className="sm:w-6 sm:h-6" />
                   </button>
                   <button
                     onClick={handleSavePost}
                     disabled={isSaving}
-                    className="p-2 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-500 border border-green-500/20 transition-all cursor-pointer disabled:opacity-50"
+                    className="p-1.5 sm:p-2 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-500 border border-green-500/20 transition-all cursor-pointer disabled:opacity-50"
                     title="Save changes"
                   >
-                     {isSaving ? <div className="w-6 h-6 border-2 border-green-500/30 border-t-green-500 rounded-full animate-spin" /> : <Save size={24} />}
+                     {isSaving ? <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-green-500/30 border-t-green-500 rounded-full animate-spin" /> : <Save size={20} className="sm:w-6 sm:h-6" />}
                   </button>
                 </>
               )}
@@ -338,13 +337,13 @@ export default function PostModal({
                 <button
                   onClick={handleDeletePost}
                   disabled={isDeletingPost}
-                  className="p-2 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 transition-all disabled:opacity-50 cursor-pointer"
+                  className="p-1.5 sm:p-2 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 transition-all disabled:opacity-50 cursor-pointer"
                   title="Delete post"
                 >
                   {isDeletingPost ? (
-                    <div className="w-6 h-6 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
                   ) : (
-                    <Trash2 size={24} />
+                    <Trash2 size={20} className="sm:w-6 sm:h-6" />
                   )}
                 </button>
               )}
@@ -353,43 +352,46 @@ export default function PostModal({
           <button
             onClick={onClose}
             disabled={isSaving}
-            className="p-2 rounded-full bg-black/50 hover:bg-black/70 text-white/80 hover:text-white transition-all cursor-pointer"
+            className="p-1.5 sm:p-2 rounded-full bg-black/50 hover:bg-black/70 text-white/80 hover:text-white transition-all cursor-pointer"
           >
-            <X size={24} />
+            <X size={20} className="sm:w-6 sm:h-6" />
           </button>
         </div>
 
-        <div className="flex flex-col md:flex-row h-full">
+        <div className="flex flex-col md:flex-row h-full overflow-hidden">
+          {/* Cover Image - Stack on mobile */}
           {displayPost.coverImage && (
-            <div className="md:w-1/2 bg-black flex items-center justify-center overflow-hidden border-r border-white/10 shrink-0 h-64 md:h-auto">
+            <div className="w-full md:w-1/2 bg-black flex items-center justify-center overflow-hidden border-b md:border-b-0 md:border-r border-white/10 shrink-0 h-48 sm:h-64 md:h-auto">
               <img
                 src={displayPost.coverImage}
                 alt={displayPost.title}
-                className="w-full h-full object-contain md:object-cover"
+                className="w-full h-full object-cover"
               />
             </div>
           )}
 
+          {/* Content Area */}
           <div
             className={`${
               displayPost.coverImage ? "md:w-1/2" : "w-full"
-            } flex flex-col h-full`}
+            } flex flex-col h-full overflow-hidden`}
           >
-            <div className="p-6 border-b border-white/10 shrink-0">
+            {/* Header */}
+            <div className="p-4 sm:p-6 border-b border-white/10 shrink-0">
               <div className="flex items-center gap-3 mb-4">
                 {displayPost.author.avatar ? (
                   <img
                     src={displayPost.author.avatar}
                     alt={displayPost.author.username}
-                    className="w-10 h-10 rounded-full object-cover border border-white/20"
+                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border border-white/20"
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-sm sm:text-base font-bold">
                     {displayPost.author.username[0].toUpperCase()}
                   </div>
                 )}
                 <div>
-                  <p className="font-semibold text-white">
+                  <p className="font-semibold text-white text-sm sm:text-base">
                     {displayPost.author.username}
                   </p>
                   <p className="text-xs text-gray-400">
@@ -408,20 +410,20 @@ export default function PostModal({
                       type="text"
                       value={editedTitle}
                       onChange={(e) => setEditedTitle(e.target.value)}
-                      className="w-full bg-white/10 border border-white/20 rounded-lg p-2 text-white font-bold text-xl focus:outline-none focus:border-purple-500"
+                      className="w-full bg-white/10 border border-white/20 rounded-lg p-2 text-white font-bold text-lg sm:text-xl focus:outline-none focus:border-purple-500"
                       placeholder="Post Title"
                     />
                     <input
                       type="text"
                       value={editedTags}
                       onChange={(e) => setEditedTags(e.target.value)}
-                      className="w-full bg-white/10 border border-white/20 rounded-lg p-2 text-sm text-purple-300 focus:outline-none focus:border-purple-500"
+                      className="w-full bg-white/10 border border-white/20 rounded-lg p-2 text-xs sm:text-sm text-purple-300 focus:outline-none focus:border-purple-500"
                       placeholder="Tags (comma separated)..."
                     />
                 </div>
               ) : (
                 <>
-                  <h2 className="text-2xl font-bold text-white mb-3">
+                  <h2 className="text-xl sm:text-2xl font-bold text-white mb-3">
                     {displayPost.title}
                   </h2>
                   {displayPost.tags && displayPost.tags.length > 0 && (
@@ -429,7 +431,7 @@ export default function PostModal({
                       {displayPost.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="px-3 py-1 rounded-full text-xs bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                          className="px-2 sm:px-3 py-1 rounded-full text-xs bg-purple-500/20 text-purple-300 border border-purple-500/30"
                         >
                           #{tag}
                         </span>
@@ -440,7 +442,7 @@ export default function PostModal({
               )}
 
               {!isEditing && (
-                <div className="flex items-center gap-6 pt-3">
+                <div className="flex items-center gap-4 sm:gap-6 pt-3">
                   <button
                     onClick={handleLike}
                     className={`flex items-center gap-2 transition-all cursor-pointer ${
@@ -449,47 +451,47 @@ export default function PostModal({
                         : "text-gray-400 hover:text-pink-400"
                     }`}
                   >
-                    <Heart size={22} fill={liked ? "currentColor" : "none"} />
-                    <span className="font-semibold">{likeCount}</span>
+                    <Heart size={20} className="sm:w-6 sm:h-6" fill={liked ? "currentColor" : "none"} />
+                    <span className="font-semibold text-sm sm:text-base">{likeCount}</span>
                   </button>
                   <div className="flex items-center gap-2 text-gray-400">
-                    <MessageCircle size={22} />
-                    <span className="font-semibold">{comments.length}</span>
+                    <MessageCircle size={20} className="sm:w-6 sm:h-6" />
+                    <span className="font-semibold text-sm sm:text-base">{comments.length}</span>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* HIDDEN SCROLLBAR APPLIED HERE */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6 hide-scrollbar">
+            {/* Scrollable Content Area */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6 hide-scrollbar">
               {isEditing ? (
                  <textarea
                   value={editedContent}
                   onChange={(e) => setEditedContent(e.target.value)}
-                  className="w-full h-64 bg-white/10 border border-white/20 rounded-lg p-4 text-gray-200 leading-relaxed focus:outline-none focus:border-purple-500 resize-none hide-scrollbar"
+                  className="w-full h-48 sm:h-64 bg-white/10 border border-white/20 rounded-lg p-3 sm:p-4 text-sm sm:text-base text-gray-200 leading-relaxed focus:outline-none focus:border-purple-500 resize-none hide-scrollbar"
                   placeholder="Post content..."
                 />
               ) : (
                 <div className="prose prose-invert max-w-none">
-                  <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">
+                  <p className="text-sm sm:text-base text-gray-300 leading-relaxed whitespace-pre-wrap">
                     {displayPost.content}
                   </p>
                 </div>
               )}
 
               {!isEditing && (
-                <div className="border-t border-white/10 pt-6">
-                  <h3 className="text-lg font-bold text-white mb-4">
+                <div className="border-t border-white/10 pt-4 sm:pt-6">
+                  <h3 className="text-base sm:text-lg font-bold text-white mb-3 sm:mb-4">
                     Comments ({comments.length})
                   </h3>
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {comments.map((comment) => {
                       const isCommentOwner =
                         currentUserId && comment.author?._id === currentUserId;
                       return (
                         <div
                           key={comment._id}
-                          className="p-4 rounded-2xl bg-white/5 border border-white/10 group"
+                          className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 group"
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex items-center gap-2 mb-2">
@@ -497,15 +499,15 @@ export default function PostModal({
                                 <img
                                   src={comment.author.avatar}
                                   alt={comment.author.username}
-                                  className="w-8 h-8 rounded-full object-cover border border-white/20"
+                                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border border-white/20"
                                 />
                               ) : (
-                                <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs text-white">
+                                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs text-white">
                                   {comment.author.username[0].toUpperCase()}
                                 </div>
                               )}
                               <div>
-                                <p className="font-semibold text-white text-sm">
+                                <p className="font-semibold text-white text-xs sm:text-sm">
                                   {comment.author.username}
                                 </p>
                               </div>
@@ -514,17 +516,17 @@ export default function PostModal({
                               <button
                                 onClick={() => handleDeleteComment(comment._id)}
                                 disabled={isDeleting === comment._id}
-                                className="text-gray-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all cursor-pointer disabled:opacity-50"
+                                className="text-gray-500 hover:text-red-500 transition-all cursor-pointer disabled:opacity-50"
                               >
                                 {isDeleting === comment._id ? (
                                   <div className="w-4 h-4 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
                                 ) : (
-                                  <Trash2 size={16} />
+                                  <Trash2 size={14} className="sm:w-4 sm:h-4" />
                                 )}
                               </button>
                             )}
                           </div>
-                          <p className="text-gray-300 text-sm pl-10">
+                          <p className="text-gray-300 text-xs sm:text-sm pl-9 sm:pl-10">
                             {comment.content}
                           </p>
                         </div>
@@ -535,8 +537,9 @@ export default function PostModal({
               )}
             </div>
 
+            {/* Comment Input - Fixed at bottom */}
             {!isEditing && (
-              <div className="p-4 border-t border-white/10 bg-black/50 shrink-0">
+              <div className="p-3 sm:p-4 border-t border-white/10 bg-black/50 shrink-0">
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -544,15 +547,15 @@ export default function PostModal({
                     onChange={(e) => setNewComment(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Add a comment..."
-                    className="flex-1 px-4 py-3 rounded-full bg-white/5 border border-white/20 text-white focus:outline-none focus:border-pink-400"
+                    className="flex-1 px-3 sm:px-4 py-2 sm:py-3 rounded-full bg-white/5 border border-white/20 text-white text-sm sm:text-base focus:outline-none focus:border-pink-400"
                   />
                   <button
                     onClick={handleSubmitComment}
                     disabled={!newComment.trim() || isSubmitting}
-                    className="px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                    className="px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold flex items-center gap-2 disabled:opacity-50 cursor-pointer text-sm sm:text-base"
                   >
-                    <Send size={18} />
-                    {isSubmitting ? "..." : "Send"}
+                    <Send size={16} className="sm:w-5 sm:h-5" />
+                    <span className="hidden sm:inline">{isSubmitting ? "..." : "Send"}</span>
                   </button>
                 </div>
               </div>
