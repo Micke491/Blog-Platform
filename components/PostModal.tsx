@@ -1,7 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Heart, MessageCircle, Send, Trash2, Edit2, Save, XCircle } from "lucide-react";
+import {
+  X,
+  Heart,
+  MessageCircle,
+  Send,
+  Trash2,
+  Edit2,
+  Save,
+  XCircle,
+} from "lucide-react";
 import { useToast } from "@/components/Toast";
 
 type Post = {
@@ -27,7 +36,7 @@ interface PostModalProps {
   onClose: () => void;
   currentUsername?: string;
   currentUserId?: string;
-  onPostUpdated?: (updatedPost: Post | null) => void; 
+  onPostUpdated?: (updatedPost: Post | null) => void;
 }
 
 export default function PostModal({
@@ -38,13 +47,13 @@ export default function PostModal({
   onPostUpdated,
 }: PostModalProps) {
   const { toast, Toast } = useToast();
-  
+
   const [displayPost, setDisplayPost] = useState<Post | null>(post);
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [isDeletingPost, setIsDeletingPost] = useState(false);
@@ -78,7 +87,7 @@ export default function PostModal({
     if (!post) return;
     setDisplayPost(post);
     setLikeCount(post.likes.length);
-    
+
     const hasLiked = currentUserId
       ? post.likes.some((likeId: any) => {
           if (!likeId) return false;
@@ -123,7 +132,7 @@ export default function PostModal({
 
     try {
       const token = localStorage.getItem("token");
-      
+
       const tagsArray = editedTags
         .split(",")
         .map((tag) => tag.trim())
@@ -151,11 +160,11 @@ export default function PostModal({
           content: editedContent,
           tags: tagsArray,
         };
-        
+
         setDisplayPost(updatedPost);
         setIsEditing(false);
         toast("Post updated successfully", "success");
-        
+
         if (onPostUpdated) onPostUpdated(updatedPost);
       } else {
         toast(data.message || "Failed to update post", "error");
@@ -170,7 +179,12 @@ export default function PostModal({
 
   const handleDeletePost = async () => {
     if (!displayPost) return;
-    if (!confirm("Are you sure you want to delete this post? This action is permanent.")) return;
+    if (
+      !confirm(
+        "Are you sure you want to delete this post? This action is permanent."
+      )
+    )
+      return;
 
     setIsDeletingPost(true);
     try {
@@ -211,8 +225,7 @@ export default function PostModal({
       const data = await response.json();
       if (response.ok) {
         setLikeCount(data.likes);
-        const newLikedState =
-          data.liked !== undefined ? data.liked : !liked;
+        const newLikedState = data.liked !== undefined ? data.liked : !liked;
         setLiked(newLikedState);
         toast(newLikedState ? "Post liked!" : "Post unliked", "success");
       }
@@ -328,7 +341,11 @@ export default function PostModal({
                     className="p-1.5 sm:p-2 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-500 border border-green-500/20 transition-all cursor-pointer disabled:opacity-50"
                     title="Save changes"
                   >
-                     {isSaving ? <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-green-500/30 border-t-green-500 rounded-full animate-spin" /> : <Save size={20} className="sm:w-6 sm:h-6" />}
+                    {isSaving ? (
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-green-500/30 border-t-green-500 rounded-full animate-spin" />
+                    ) : (
+                      <Save size={20} className="sm:w-6 sm:h-6" />
+                    )}
                   </button>
                 </>
               )}
@@ -395,31 +412,34 @@ export default function PostModal({
                     {displayPost.author.username}
                   </p>
                   <p className="text-xs text-gray-400">
-                    {new Date(displayPost.createdAt).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
+                    {new Date(displayPost.createdAt).toLocaleDateString(
+                      "en-US",
+                      {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      }
+                    )}
                   </p>
                 </div>
               </div>
 
               {isEditing ? (
                 <div className="space-y-3">
-                    <input
-                      type="text"
-                      value={editedTitle}
-                      onChange={(e) => setEditedTitle(e.target.value)}
-                      className="w-full bg-white/10 border border-white/20 rounded-lg p-2 text-white font-bold text-lg sm:text-xl focus:outline-none focus:border-purple-500"
-                      placeholder="Post Title"
-                    />
-                    <input
-                      type="text"
-                      value={editedTags}
-                      onChange={(e) => setEditedTags(e.target.value)}
-                      className="w-full bg-white/10 border border-white/20 rounded-lg p-2 text-xs sm:text-sm text-purple-300 focus:outline-none focus:border-purple-500"
-                      placeholder="Tags (comma separated)..."
-                    />
+                  <input
+                    type="text"
+                    value={editedTitle}
+                    onChange={(e) => setEditedTitle(e.target.value)}
+                    className="w-full bg-white/10 border border-white/20 rounded-lg p-2 text-white font-bold text-lg sm:text-xl focus:outline-none focus:border-purple-500"
+                    placeholder="Post Title"
+                  />
+                  <input
+                    type="text"
+                    value={editedTags}
+                    onChange={(e) => setEditedTags(e.target.value)}
+                    className="w-full bg-white/10 border border-white/20 rounded-lg p-2 text-xs sm:text-sm text-purple-300 focus:outline-none focus:border-purple-500"
+                    placeholder="Tags (comma separated)..."
+                  />
                 </div>
               ) : (
                 <>
@@ -451,12 +471,20 @@ export default function PostModal({
                         : "text-gray-400 hover:text-pink-400"
                     }`}
                   >
-                    <Heart size={20} className="sm:w-6 sm:h-6" fill={liked ? "currentColor" : "none"} />
-                    <span className="font-semibold text-sm sm:text-base">{likeCount}</span>
+                    <Heart
+                      size={20}
+                      className="sm:w-6 sm:h-6"
+                      fill={liked ? "currentColor" : "none"}
+                    />
+                    <span className="font-semibold text-sm sm:text-base">
+                      {likeCount}
+                    </span>
                   </button>
                   <div className="flex items-center gap-2 text-gray-400">
                     <MessageCircle size={20} className="sm:w-6 sm:h-6" />
-                    <span className="font-semibold text-sm sm:text-base">{comments.length}</span>
+                    <span className="font-semibold text-sm sm:text-base">
+                      {comments.length}
+                    </span>
                   </div>
                 </div>
               )}
@@ -465,7 +493,7 @@ export default function PostModal({
             {/* Scrollable Content Area */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6 hide-scrollbar">
               {isEditing ? (
-                 <textarea
+                <textarea
                   value={editedContent}
                   onChange={(e) => setEditedContent(e.target.value)}
                   className="w-full h-48 sm:h-64 bg-white/10 border border-white/20 rounded-lg p-3 sm:p-4 text-sm sm:text-base text-gray-200 leading-relaxed focus:outline-none focus:border-purple-500 resize-none hide-scrollbar"
@@ -555,7 +583,9 @@ export default function PostModal({
                     className="px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold flex items-center gap-2 disabled:opacity-50 cursor-pointer text-sm sm:text-base"
                   >
                     <Send size={16} className="sm:w-5 sm:h-5" />
-                    <span className="hidden sm:inline">{isSubmitting ? "..." : "Send"}</span>
+                    <span className="hidden sm:inline">
+                      {isSubmitting ? "..." : "Send"}
+                    </span>
                   </button>
                 </div>
               </div>

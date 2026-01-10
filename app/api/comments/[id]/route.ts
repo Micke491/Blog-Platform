@@ -4,7 +4,10 @@ import Post from "@/models/Post";
 import Comment from "@/models/Comment";
 import jwt from "jsonwebtoken";
 
-export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     await connectDB();
     const { id } = await params;
@@ -19,7 +22,10 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
     const comment = await Comment.findById(id);
     if (!comment) {
-      return NextResponse.json({ message: "Comment not found" }, { status: 404 });
+      return NextResponse.json(
+        { message: "Comment not found" },
+        { status: 404 }
+      );
     }
 
     if (comment.author.toString() !== userId) {
@@ -29,12 +35,14 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     await Comment.findByIdAndDelete(id);
 
     await Post.findByIdAndUpdate(comment.post, {
-      $pull: { comments: id }
+      $pull: { comments: id },
     });
 
     return NextResponse.json({ message: "Comment deleted" }, { status: 200 });
-
   } catch (error) {
-    return NextResponse.json({ message: "Error deleting comment" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Error deleting comment" },
+      { status: 500 }
+    );
   }
 }

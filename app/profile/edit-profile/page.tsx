@@ -145,7 +145,9 @@ export default function EditProfilePage() {
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => e.target.files && uploadAvatar(e.target.files[0])}
+                onChange={(e) =>
+                  e.target.files && uploadAvatar(e.target.files[0])
+                }
                 disabled={uploading}
                 className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-500/20 file:text-purple-300 hover:file:bg-purple-500/30 file:cursor-pointer disabled:opacity-50 cursor-pointer"
               />
@@ -193,7 +195,11 @@ export default function EditProfilePage() {
             disabled={loading || uploading}
             className="flex-1 py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 font-semibold hover:scale-[1.02] transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
-            {loading ? "Saving..." : uploading ? "Uploading..." : "Save Changes"}
+            {loading
+              ? "Saving..."
+              : uploading
+                ? "Uploading..."
+                : "Save Changes"}
           </button>
         </div>
       </main>
@@ -201,4 +207,3 @@ export default function EditProfilePage() {
     </div>
   );
 }
-

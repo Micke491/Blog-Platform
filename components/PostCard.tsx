@@ -47,9 +47,7 @@ export default function PostCard({ post }: PostCardProps) {
             {post.title}
           </h3>
 
-          <p className="text-gray-400 text-sm mb-5 line-clamp-3">
-            {excerpt}
-          </p>
+          <p className="text-gray-400 text-sm mb-5 line-clamp-3">{excerpt}</p>
 
           <div className="flex items-center gap-4 text-sm text-gray-400">
             <div className="flex items-center gap-1">

@@ -43,9 +43,12 @@ export default function ProfilePage() {
       const meData = await meRes.json();
       setUser(meData);
 
-      const postsRes = await fetch(`/api/posts?author=${meData.username}&includePrivate=true`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const postsRes = await fetch(
+        `/api/posts?author=${meData.username}&includePrivate=true`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       if (postsRes.ok) {
         const postsData = await postsRes.json();
@@ -69,14 +72,13 @@ export default function ProfilePage() {
 
     // Refetch posts when window regains focus
     const handleFocus = () => loadProfile();
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
   }, [router]);
 
   function logout() {
     localStorage.removeItem("token");
-    document.cookie =
-      "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     router.push("/");
   }
 
@@ -113,9 +115,7 @@ export default function ProfilePage() {
             <h1 className="text-4xl font-black">{user.username}</h1>
             <p className="text-gray-400 text-sm">{user.email}</p>
             {user.bio && (
-              <p className="text-gray-300 mt-2 max-w-md">
-                {user.bio}
-              </p>
+              <p className="text-gray-300 mt-2 max-w-md">{user.bio}</p>
             )}
           </div>
         </div>

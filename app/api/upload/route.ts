@@ -13,7 +13,10 @@ export async function POST(request: NextRequest) {
     // Check file size (Cloudinary free plan limit is 10MB)
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
-      return NextResponse.json({ error: "File size too large. Maximum 10MB allowed." }, { status: 400 });
+      return NextResponse.json(
+        { error: "File size too large. Maximum 10MB allowed." },
+        { status: 400 }
+      );
     }
 
     // Convert file to buffer
@@ -36,7 +39,7 @@ export async function POST(request: NextRequest) {
         }
       );
 
-      stream.on('error', (err) => {
+      stream.on("error", (err) => {
         reject(err);
       });
 

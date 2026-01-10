@@ -5,19 +5,22 @@ import Comment from "@/models/Comment";
 import jwt from "jsonwebtoken";
 
 // GET: Fetch a single post
-export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     await connectDB();
     const { id } = await params;
-    
+
     const post = await Post.findById(id)
-      .populate('author', 'username avatar')
+      .populate("author", "username avatar")
       .populate({
-        path: 'comments',
+        path: "comments",
         populate: {
-          path: 'author',
-          select: 'username avatar'
-        }
+          path: "author",
+          select: "username avatar",
+        },
       });
 
     if (!post) {
@@ -26,11 +29,17 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
     return NextResponse.json({ post }, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ message: "Error fetching post" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Error fetching post" },
+      { status: 500 }
+    );
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     await connectDB();
     const { id } = await params;
@@ -57,7 +66,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     // 3. Check Ownership
     if (post.author.toString() !== userId) {
-      return NextResponse.json({ message: "Forbidden - You can only edit your own posts" }, { status: 403 });
+      return NextResponse.json(
+        { message: "Forbidden - You can only edit your own posts" },
+        { status: 403 }
+      );
     }
 
     // 4. Update Fields
@@ -71,18 +83,29 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     await post.save();
 
     // 5. Return updated post (populated so UI stays consistent)
-    const updatedPost = await Post.findById(id).populate('author', 'username avatar');
+    const updatedPost = await Post.findById(id).populate(
+      "author",
+      "username avatar"
+    );
 
-    return NextResponse.json({ post: updatedPost, message: "Post updated successfully" }, { status: 200 });
-
+    return NextResponse.json(
+      { post: updatedPost, message: "Post updated successfully" },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error updating post:", error);
-    return NextResponse.json({ message: "Error updating post" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Error updating post" },
+      { status: 500 }
+    );
   }
 }
 
 // DELETE: Remove a post
-export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     await connectDB();
     const { id } = await params;
@@ -110,8 +133,14 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     // Delete the post
     await Post.findByIdAndDelete(id);
 
-    return NextResponse.json({ message: "Post deleted successfully" }, { status: 200 });
+    return NextResponse.json(
+      { message: "Post deleted successfully" },
+      { status: 200 }
+    );
   } catch (error) {
-    return NextResponse.json({ message: "Error deleting post" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Error deleting post" },
+      { status: 500 }
+    );
   }
 }

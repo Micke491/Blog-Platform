@@ -6,11 +6,7 @@ interface TagCloudProps {
   onToggle: (tag: string) => void;
 }
 
-export default function TagCloud({
-  tags,
-  selected,
-  onToggle,
-}: TagCloudProps) {
+export default function TagCloud({ tags, selected, onToggle }: TagCloudProps) {
   return (
     <div className="flex flex-wrap gap-2">
       {tags.map((tag) => {

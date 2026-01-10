@@ -38,7 +38,7 @@ export default function PostPage() {
       try {
         const response = await fetch("/api/me", {
           headers: {
-            "Authorization": `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         });
         const data = await response.json();
@@ -64,7 +64,7 @@ export default function PostPage() {
         const token = localStorage.getItem("token");
         const response = await fetch(`/api/posts/${params.id}`, {
           headers: {
-            "Authorization": `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         });
         if (response.ok) {
@@ -85,7 +85,7 @@ export default function PostPage() {
   }, [isAuthenticated, params.id, router]);
 
   const handleClose = () => {
-    router.push("/explore"); 
+    router.push("/explore");
   };
 
   // Loading State
@@ -108,7 +108,7 @@ export default function PostPage() {
         <Navbar />
         <div className="flex flex-col items-center justify-center min-h-[80vh] gap-4">
           <div className="text-white text-xl font-bold">Post not found</div>
-          <button 
+          <button
             onClick={() => router.push("/explore")}
             className="text-purple-400 hover:text-purple-300 underline"
           >
@@ -122,7 +122,7 @@ export default function PostPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
       <Navbar />
-      
+
       <PostModal
         post={post}
         onClose={handleClose} // Uses the safe navigation logic
@@ -130,11 +130,11 @@ export default function PostPage() {
         currentUserId={currentUserId}
         // If the user deletes the post while on its specific page, redirect to explore
         onPostUpdated={(updatedPost) => {
-            if (updatedPost === null) {
-                router.push("/explore");
-            } else {
-                setPost(updatedPost);
-            }
+          if (updatedPost === null) {
+            router.push("/explore");
+          } else {
+            setPost(updatedPost);
+          }
         }}
       />
     </div>

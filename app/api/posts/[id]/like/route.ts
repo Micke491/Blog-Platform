@@ -4,11 +4,14 @@ import Post from "@/models/Post";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 
-export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     await connectDB();
     const { id } = await params;
-    
+
     // Provera tokena
     const token = req.headers.get("authorization")?.split(" ")[1];
     if (!token) {
@@ -25,12 +28,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     // Convert userId to ObjectId for proper comparison
     const userIdObjectId = new mongoose.Types.ObjectId(userId);
-    
+
     // Toggle like - check if user already liked
     const likeIndex = post.likes.findIndex(
       (likeId) => likeId.toString() === userIdObjectId.toString()
     );
-    
+
     if (likeIndex > -1) {
       post.likes.splice(likeIndex, 1); // Unlike
     } else {
@@ -38,12 +41,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     await post.save();
-    return NextResponse.json({ 
-      likes: post.likes.length,
-      liked: likeIndex === -1 // true if we just liked, false if we just unliked
-    }, { status: 200 });
+    return NextResponse.json(
+      {
+        likes: post.likes.length,
+        liked: likeIndex === -1, // true if we just liked, false if we just unliked
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error processing like:", error);
-    return NextResponse.json({ message: "Error processing like" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Error processing like" },
+      { status: 500 }
+    );
   }
 }

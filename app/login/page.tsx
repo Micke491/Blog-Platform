@@ -20,8 +20,8 @@ export default function LoginPage() {
     const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
     };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,34 +62,39 @@ export default function LoginPage() {
     <div className="min-h-screen bg-black text-white overflow-hidden">
       {/* Animated gradient background */}
       <div className="fixed inset-0 bg-gradient-to-br from-purple-900 via-black to-pink-900 opacity-50"></div>
-    
+
       {/* Moving gradient orb */}
-      <div 
+      <div
         className="fixed w-96 h-96 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 blur-3xl opacity-20 transition-all duration-1000 ease-out"
         style={{
           left: `${mousePosition.x - 192}px`,
           top: `${mousePosition.y - 192}px`,
-          pointerEvents: 'none'
+          pointerEvents: "none",
         }}
       ></div>
-      
+
       <div className="relative z-10">
-        <Navbar variant="auth"/>
-        
+        <Navbar variant="auth" />
+
         <main className="flex items-center justify-center min-h-screen px-6 pt-20">
           <div className="w-full max-w-md">
             {/* Card */}
             <div className="relative group">
               {/* Glow effect */}
               <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl blur opacity-25 group-hover:opacity-75 transition duration-1000"></div>
-              
+
               {/* Main card */}
               <div className="relative p-8 bg-black/40 backdrop-blur-xl rounded-3xl border border-white/10">
                 <div className="text-center mb-8">
                   <h1 className="text-4xl font-black mb-2">
-                    Welcome <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Back</span>
+                    Welcome{" "}
+                    <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                      Back
+                    </span>
                   </h1>
-                  <p className="text-gray-400">Sign in to continue your journey</p>
+                  <p className="text-gray-400">
+                    Sign in to continue your journey
+                  </p>
                 </div>
 
                 {error && (
@@ -100,7 +105,10 @@ export default function LoginPage() {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium mb-2 text-gray-300">
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium mb-2 text-gray-300"
+                    >
                       Email
                     </label>
                     <input
@@ -115,7 +123,10 @@ export default function LoginPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="password" className="block text-sm font-medium mb-2 text-gray-300">
+                    <label
+                      htmlFor="password"
+                      className="block text-sm font-medium mb-2 text-gray-300"
+                    >
                       Password
                     </label>
                     <input
@@ -129,8 +140,8 @@ export default function LoginPage() {
                     />
                   </div>
 
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     className="w-full h-12 text-base font-semibold cursor-pointer"
                     disabled={loading}
                   >
@@ -148,7 +159,10 @@ export default function LoginPage() {
                 <div className="mt-6 text-center">
                   <p className="text-gray-400 text-sm">
                     Don't have an account?{" "}
-                    <Link href="/register" className="text-purple-400 hover:text-pink-400 font-semibold transition-colors">
+                    <Link
+                      href="/register"
+                      className="text-purple-400 hover:text-pink-400 font-semibold transition-colors"
+                    >
                       Create one
                     </Link>
                   </p>

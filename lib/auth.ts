@@ -19,7 +19,10 @@ export function verifyToken(req: Request) {
   if (!token) return null;
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "your_jwt_secret") as any;
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "your_jwt_secret"
+    ) as any;
     const id = decoded?.userId ?? decoded?.id ?? decoded?._id;
     if (!id) return null;
     if (process.env.NODE_ENV === "development") {
@@ -27,7 +30,8 @@ export function verifyToken(req: Request) {
     }
     return { id };
   } catch (err) {
-    if (process.env.NODE_ENV === "development") console.debug("verifyToken failed:", err);
+    if (process.env.NODE_ENV === "development")
+      console.debug("verifyToken failed:", err);
     return null;
   }
 }

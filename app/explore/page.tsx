@@ -65,7 +65,7 @@ export default function ExplorePage() {
   useEffect(() => {
     if (!isAuthenticated) return;
     loadPosts();
-    
+
     const handleFocus = () => loadPosts();
     window.addEventListener("focus", handleFocus);
     return () => window.removeEventListener("focus", handleFocus);
@@ -118,9 +118,7 @@ export default function ExplorePage() {
       if (sort === "likes") {
         return b.likes.length - a.likes.length;
       }
-      return (
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
   function toggleTag(tag: string) {
@@ -167,7 +165,6 @@ export default function ExplorePage() {
         {/* --- CONTROL BAR --- */}
         <section className="sticky top-20 z-20 backdrop-blur-xl bg-black/60 border-y border-white/10 shadow-lg">
           <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            
             {/* Left Side: Sort Dropdown */}
             <div className="relative w-full md:w-auto group">
               <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -175,13 +172,15 @@ export default function ExplorePage() {
               </div>
               <select
                 value={sort}
-                onChange={(e) =>
-                  setSort(e.target.value as "latest" | "likes")
-                }
+                onChange={(e) => setSort(e.target.value as "latest" | "likes")}
                 className="w-full md:w-48 appearance-none bg-white/5 hover:bg-white/10 border border-white/10 rounded-full py-2.5 pl-10 pr-10 text-sm text-white focus:outline-none focus:border-pink-500/50 transition-all cursor-pointer"
               >
-                <option value="latest" className="bg-gray-900">Latest Posts</option>
-                <option value="likes" className="bg-gray-900">Most Liked</option>
+                <option value="latest" className="bg-gray-900">
+                  Latest Posts
+                </option>
+                <option value="likes" className="bg-gray-900">
+                  Most Liked
+                </option>
               </select>
               <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
                 <ChevronDown size={16} />
@@ -269,11 +268,11 @@ export default function ExplorePage() {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                      
+
                       {/* Floating Category Badge (First Tag) */}
                       {post.tags && post.tags.length > 0 && (
                         <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-xs font-medium text-white">
-                            #{post.tags[0]}
+                          #{post.tags[0]}
                         </div>
                       )}
                     </div>

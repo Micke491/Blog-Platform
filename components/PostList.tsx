@@ -19,7 +19,11 @@ interface PostListProps {
   onPostClick?: (post: Post) => void;
 }
 
-export default function PostList({ posts, loading, onPostClick }: PostListProps) {
+export default function PostList({
+  posts,
+  loading,
+  onPostClick,
+}: PostListProps) {
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -135,10 +139,10 @@ export default function PostList({ posts, loading, onPostClick }: PostListProps)
 
             {/* Date */}
             <p className="text-xs text-gray-500 mt-3">
-              {new Date(post.createdAt).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
+              {new Date(post.createdAt).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
               })}
             </p>
           </div>

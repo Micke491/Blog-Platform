@@ -10,10 +10,7 @@ export async function PUT(request: NextRequest) {
     const authHeader = request.headers.get("authorization");
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json(
-        { message: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     const token = authHeader.split(" ")[1];
@@ -30,17 +27,12 @@ export async function PUT(request: NextRequest) {
       updateData.avatar = avatar || null;
     }
 
-    const user = await User.findByIdAndUpdate(
-      decoded.userId,
-      updateData,
-      { new: true }
-    ).select("-password");
+    const user = await User.findByIdAndUpdate(decoded.userId, updateData, {
+      new: true,
+    }).select("-password");
 
     if (!user) {
-      return NextResponse.json(
-        { message: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -58,4 +50,3 @@ export async function PUT(request: NextRequest) {
     );
   }
 }
-
