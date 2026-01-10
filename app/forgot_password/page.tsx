@@ -1,20 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/button";
-import { Navbar } from "@/components/navbar";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useToast } from "@/components/Toast";
+import React, { useState, useEffect } from "react";
 
-export default function LoginPage() {
-  const { toast, Toast } = useToast();
+export default function ForgotPasswordPage() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -27,43 +20,37 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
     setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch("/api/auth/password_reset_request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        const errorMsg = data.message || "Login failed";
-        setError(errorMsg);
-        toast(errorMsg, "error");
+        setError(data.message || "Failed to send reset email");
         setLoading(false);
         return;
       }
 
-      // Store token
-      localStorage.setItem("token", data.token);
-      toast("Login successful! Welcome back!", "success");
-      setTimeout(() => router.push("/explore"), 500);
+      setSuccess("Check your email for password reset instructions");
+      setEmail("");
+      setLoading(false);
     } catch (err) {
-      const errorMsg = "Something went wrong. Please try again.";
-      setError(errorMsg);
-      toast(errorMsg, "error");
+      setError("Something went wrong. Please try again.");
       setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden">
-      {/* Animated gradient background */}
       <div className="fixed inset-0 bg-gradient-to-br from-purple-900 via-black to-pink-900 opacity-50"></div>
 
-      {/* Moving gradient orb */}
       <div
         className="fixed w-96 h-96 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 blur-3xl opacity-20 transition-all duration-1000 ease-out"
         style={{
@@ -74,32 +61,51 @@ export default function LoginPage() {
       ></div>
 
       <div className="relative z-10">
-        <Navbar variant="auth" />
+        <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-black/30 border-b border-white/10">
+          <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="/" className="text-2xl font-black">
+              <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                Logo
+              </span>
+            </a>
+            <a
+              href="/login"
+              className="text-sm text-gray-400 hover:text-white transition-colors"
+            >
+              Back to Login
+            </a>
+          </div>
+        </nav>
 
         <main className="flex items-center justify-center min-h-screen px-6 pt-20">
           <div className="w-full max-w-md">
-            {/* Card */}
             <div className="relative group">
-              {/* Glow effect */}
               <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl blur opacity-25 group-hover:opacity-75 transition duration-1000"></div>
 
-              {/* Main card */}
               <div className="relative p-8 bg-black/40 backdrop-blur-xl rounded-3xl border border-white/10">
                 <div className="text-center mb-8">
                   <h1 className="text-4xl font-black mb-2">
-                    Welcome{" "}
+                    Forgot{" "}
                     <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                      Back
+                      Password?
                     </span>
                   </h1>
                   <p className="text-gray-400">
-                    Sign in to continue your journey
+                    Enter your email to receive reset instructions
                   </p>
                 </div>
 
                 {error && (
                   <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 backdrop-blur-sm">
                     <p className="text-red-400 text-sm text-center">{error}</p>
+                  </div>
+                )}
+
+                {success && (
+                  <div className="mb-6 p-4 rounded-2xl bg-green-500/10 border border-green-500/30 backdrop-blur-sm">
+                    <p className="text-green-400 text-sm text-center">
+                      {success}
+                    </p>
                   </div>
                 )}
 
@@ -122,57 +128,31 @@ export default function LoginPage() {
                     />
                   </div>
 
-                  <div>
-                    <label
-                      htmlFor="password"
-                      className="block text-sm font-medium mb-2 text-gray-300"
-                    >
-                      Password
-                    </label>
-                    <input
-                      type="password"
-                      id="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-4 py-3 rounded-2xl bg-white/5 border border-white/10 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all backdrop-blur-sm text-white placeholder-gray-500"
-                      placeholder="••••••••"
-                      required
-                    />
-                  </div>
-
-                  <Button
+                  <button
                     type="submit"
-                    className="w-full h-12 text-base font-semibold cursor-pointer"
+                    className="w-full h-12 text-base font-semibold cursor-pointer bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-2xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={loading}
                   >
                     {loading ? (
-                      <span className="flex items-center gap-2">
+                      <span className="flex items-center justify-center gap-2">
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        Signing in...
+                        Sending...
                       </span>
                     ) : (
-                      "Sign In"
+                      "Send Reset Link"
                     )}
-                  </Button>
+                  </button>
                 </form>
 
                 <div className="mt-6 text-center">
                   <p className="text-gray-400 text-sm">
-                    Don't have an account?{" "}
-                    <Link
-                      href="/register"
+                    Remember your password?{" "}
+                    <a
+                      href="/login"
                       className="text-purple-400 hover:text-pink-400 font-semibold transition-colors"
                     >
-                      Create one
-                    </Link>
-                  </p>
-                </div>
-
-                <div className="mt-2 text-center">
-                  <p className="mt-4 text-gray-400 text-sm">
-                    <Link href="/forgot_password" className="text-purple-400 hover:text-pink-400 font-semibold transition-colors">
-                      Forgot your password?
-                    </Link>
+                      Sign in
+                    </a>
                   </p>
                 </div>
               </div>
@@ -180,7 +160,6 @@ export default function LoginPage() {
           </div>
         </main>
       </div>
-      <Toast />
     </div>
   );
 }
