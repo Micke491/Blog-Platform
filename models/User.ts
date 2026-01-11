@@ -40,19 +40,25 @@ const UserSchema = new Schema<IUser>(
     avatar: {
       type: String,
     },
+    // Removing 'default: undefined' to ensure Mongoose treats them as optional/nullable correctly
     resetPasswordToken: {
       type: String,
-      default: undefined,
+      required: false,
     },
     resetPasswordExpires: {
       type: Date,
-      default: undefined,
+      required: false,
     },
   },
   {
     timestamps: true,
   }
 );
+
+// Clear the model cache in development to ensure schema changes are picked up
+if (process.env.NODE_ENV !== 'production') {
+  delete mongoose.models.User;
+}
 
 const User: Model<IUser> =
   mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
