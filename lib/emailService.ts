@@ -10,35 +10,31 @@ class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor() {
-    // For production, use services like SendGrid, Mailgun, AWS SES
-    // For development/testing, you can use Gmail with app password
     this.transporter = nodemailer.createTransport({
-      service: 'gmail', // or use SMTP settings
+      host: 'smtp-relay.brevo.com',
+      port: 587,
+      secure: false,
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_APP_PASSWORD, // Use App Password for Gmail
+        user: process.env.BREVO_USER,
+        pass: process.env.BREVO_SMTP_KEY,
       },
     });
-
-    // Alternative: Using SendGrid
-    // const sgMail = require('@sendgrid/mail');
-    // sgMail.setApiKey(process.env.SENDGRID_API_KEY);
   }
 
   async sendEmail({ to, subject, html }: EmailOptions): Promise<boolean> {
     try {
       const mailOptions = {
-        from: process.env.EMAIL_USER || 'noreply@yourapp.com',
+        from: 'nikolamicic07@gmail.com', // Must be a verified sender
         to,
         subject,
         html,
       };
 
-      await this.transporter.sendMail(mailOptions);
-      console.log(`Email sent successfully to ${to}`);
+      const info = await this.transporter.sendMail(mailOptions);
+      console.log('Message sent: %s', info.messageId);
       return true;
     } catch (error) {
-      console.error('Error sending email:', error);
+      console.error('Email Error:', error);
       return false;
     }
   }
