@@ -3,69 +3,60 @@ import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { connectDB } from '@/lib/db';
 import User from '@/models/User';
+import { emailService } from '@/lib/emailService'; // Import your service
 
+// GET: Verify Token Validity (Used when the user first clicks the link)
 export async function GET(
   req: NextRequest,
-  props: { params: Promise<{ token: string }> } 
+  props: { params: Promise<{ token: string }> }
 ) {
   try {
     await connectDB();
+    const { token } = await props.params;
 
-    // 👈 Await the params to get the token string safely
-    const params = await props.params;
-    const { token } = params;
+    // Re-hash the token from URL to compare with DB
+    const resetTokenHash = crypto.createHash('sha256').update(token).digest('hex');
 
-    // 1. Recreate the hash from the URL token
-    const resetTokenHash = crypto
-      .createHash('sha256')
-      .update(token)
-      .digest('hex');
-
-    // 2. Debugging Logs (Check your server terminal when you click the link)
-    console.log("--- DEBUG VERIFY ---");
-    console.log("Token from URL:", token);
-    console.log("Hashed Token:", resetTokenHash);
-    
-    // 3. Find user
     const user = await User.findOne({
       resetPasswordToken: resetTokenHash,
-      resetPasswordExpires: { $gt: new Date() },
+      resetPasswordExpires: { $gt: new Date() }, // Check if not expired
     });
 
     if (!user) {
-      console.log("❌ Result: No matching user found (or token expired)");
       return NextResponse.json(
         { valid: false, error: 'Invalid or expired reset token' },
         { status: 400 }
       );
     }
 
-    console.log("✅ Result: User found:", user.email);
     return NextResponse.json({ valid: true, email: user.email });
-
   } catch (error) {
     console.error('Verify Token Error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
+// POST: Execute Password Reset
 export async function POST(
   req: NextRequest,
-  props: { params: Promise<{ token: string }> } // 👈 Type as Promise
+  props: { params: Promise<{ token: string }> }
 ) {
   try {
     await connectDB();
-
-    const params = await props.params;
-    const { token } = params;
+    const { token } = await props.params;
     
     const body = await req.json();
-    const { newPassword } = body;
+    const newPassword = String(body.newPassword);
 
-    const resetTokenHash = crypto
-      .createHash('sha256')
-      .update(token)
-      .digest('hex');
+    // 1. Validation
+    if (newPassword.length < 6) {
+      return NextResponse.json(
+        { error: 'Password must be at least 6 characters long' },
+        { status: 400 }
+      );
+    }
+
+    const resetTokenHash = crypto.createHash('sha256').update(token).digest('hex');
 
     const user = await User.findOne({
       resetPasswordToken: resetTokenHash,
@@ -82,15 +73,22 @@ export async function POST(
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(newPassword, salt);
     
-    // Clear the reset fields
+    // Clear reset fields so the token cannot be reused
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
     
     await user.save();
 
+    emailService.sendEmail({
+      to: user.email,
+      subject: 'Password Reset Successful',
+      html: emailService.generatePasswordResetSuccessEmail(user.username || "User"),
+    }).catch(err => console.error("Failed to send success email:", err));
+
     return NextResponse.json({ message: 'Password reset successful' });
 
   } catch (error) {
+    console.error("Reset Password Error:", error);
     return NextResponse.json({ error: 'Internal Error' }, { status: 500 });
   }
 }

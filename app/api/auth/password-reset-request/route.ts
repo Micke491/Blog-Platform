@@ -9,9 +9,8 @@ export async function POST(req: NextRequest) {
     await connectDB();
 
     const body = await req.json();
-    const { email } = body;
+    const email = String(body.email); // Cast to string
 
-    // Validate email
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json(
         { error: 'Valid email is required' },
@@ -19,55 +18,53 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Find user by email
     const user = await User.findOne({ email: email.toLowerCase() });
 
-    // For security, always return the same message whether user exists or not
-    // This prevents email enumeration attacks
+    // Standard security message (Blind return)
+    const blindMessage = 'If an account with that email exists, a password reset link has been sent.';
+
     if (!user) {
-      console.log(`Password reset requested for non-existent email: ${email}`);
-      return NextResponse.json({
-        message: 'If an account with that email exists, a password reset link has been sent.',
-      });
+      return NextResponse.json({ message: blindMessage });
     }
 
     // Generate secure random token
     const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
 
-    // Hash the token before storing (never store plain tokens)
-    const resetTokenHash = crypto
-      .createHash('sha256')
-      .update(resetToken)
-      .digest('hex');
-
-    // Save hashed token and expiration to user
     user.resetPasswordToken = resetTokenHash;
-    user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour from now
+    user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour
     await user.save();
 
-    // Create reset URL with the unhashed token (this goes in the email)
-    const resetURL = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password/${resetToken}`;
-
-    // Send email
-    const emailSent = await emailService.sendEmail({
-      to: user.email,
-      subject: 'Password Reset Request',
-      html: emailService.generatePasswordResetEmail(resetURL, user.username),
-    });
-
-    if (!emailSent) {
-      console.error('Failed to send password reset email');
-      return NextResponse.json(
-        { error: 'Failed to send email. Please try again later.' },
-        { status: 500 }
-      );
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    if (!appUrl) {
+        console.error("NEXT_PUBLIC_APP_URL is not defined");
+        return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
     }
 
-    console.log(`Password reset email sent to: ${user.email}`);
+    // Send the UN-HASHED token to the user
+    const resetURL = `${appUrl}/reset-password/${resetToken}`;
 
-    return NextResponse.json({
-      message: 'If an account with that email exists, a password reset link has been sent.',
-    });
+    try {
+        await emailService.sendEmail({
+          to: user.email,
+          subject: 'Password Reset Request',
+          html: emailService.generatePasswordResetEmail(resetURL, user.username || "User"),
+        });
+    } catch (emailError) {
+        // If email fails, rollback the DB change so the user isn't stuck with a token they never received
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+        
+        console.error('Failed to send password reset email', emailError);
+        return NextResponse.json(
+          { error: 'Failed to send email. Please try again later.' },
+          { status: 500 }
+        );
+    }
+
+    return NextResponse.json({ message: blindMessage });
+
   } catch (error) {
     console.error('Password reset request error:', error);
     return NextResponse.json(

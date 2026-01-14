@@ -8,39 +8,50 @@ export async function POST(req: Request) {
   await connectDB();
 
   try {
-    const { email, password } = await req.json();
+    const body = await req.json();
+    
+    // SECURITY: Cast to string to prevent NoSQL injection via object payloads
+    const email = String(body.email);
+    const password = String(body.password);
 
-    // Basic validation
     if (!email || !password) {
       return NextResponse.json(
-        { message: "email and password are required" },
+        { message: "Email and password are required" },
         { status: 400 }
       );
     }
 
+    // SECURITY: Fail fast if JWT_SECRET is missing
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      console.error("JWT_SECRET is not defined in environment variables");
+      return NextResponse.json({ message: "Server configuration error" }, { status: 500 });
+    }
+
     const user = await User.findOne({ email });
+
     if (!user) {
-      return NextResponse.json({ message: "Invalid email" }, { status: 401 });
+      return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return NextResponse.json(
-        { message: "Invalid password" },
-        { status: 401 }
-      );
+      return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
     }
 
     const token = jwt.sign(
       { userId: user._id, email: user.email },
-      process.env.JWT_SECRET || "your_jwt_secret",
+      secret,
       { expiresIn: "7d" }
     );
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       { message: "Login successful", token },
       { status: 200 }
     );
+    
+    return response;
+
   } catch (error) {
     console.error("Login error:", error);
     return NextResponse.json(
